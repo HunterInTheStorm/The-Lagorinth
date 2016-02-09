@@ -9,13 +9,14 @@
 
 package Labyrinth
 
+
 import "math/rand"
 
-var wall string = "8"
+var wall string = "0"
 var pass string = " "
 var treasure string = "$"
 var trap string = "*"
-pointMap := make(map[Point]bool)
+var pointMap = map[Point]bool{}
 
 //The structure has 3 fields:
 //	integers for X and Y coordinates
@@ -34,12 +35,12 @@ func (point Point) Opposite() Point {
 
 
 //The stucture has two fields:
-//integers width and heigth of the labyrinth/2D array
+//integers width and height of the labyrinth/2D array
 //2D array of strings(of characters) which will represent the generated maze
 type Labyrinth struct{
-	width, heigt int
+	width, height int
 	//rng int
-	labyrinth [width][heigt]string
+	labyrinth [40][40]string
 }
 
 
@@ -50,21 +51,21 @@ func (lab *Labyrinth) Prim(seed int64) {
 	frontier := make([]Point, 0, 40)
 	rand.Seed(seed)
 	start := Point{rand.Intn(lab.width - 1) + 1, rand.Intn(lab.width - 1) + 1, nil}
-	lab.labyrinth[start.x][start.y] = wall
+	lab.labyrinth[start.x][start.y] = trap
 	lab.Neighbours(&start, &frontier)
 	for {
 		randomPoint := rand.Intn(len(frontier))
 		current := frontier[randomPoint]
-		frontier = append(frontier[:randomPoint], frontier[randomPoint +1])
+		frontier = append(frontier[:randomPoint], frontier[randomPoint +1:]...)
 
 		opposite := current.Opposite()
 		last := opposite
 		
 		if lab.labyrinth[opposite.x][opposite.y] == wall {
-			lab.labyrinth[current.x][current.y] == pass
+			lab.labyrinth[current.x][current.y] = pass
 
-			if opposite.x != 0 && opposite.x != lab.width - 1 && opposite.y != 0 && opposite.y != lab.heigth - 1 {
-				lab.labyrinth[opposite.x][opposite.y] == pass
+			if opposite.x != 0 && opposite.x != lab.width - 1 && opposite.y != 0 && opposite.y != lab.height - 1 {
+				lab.labyrinth[opposite.x][opposite.y] = pass
 			}
 
 			lab.Neighbours(&opposite, &frontier)
@@ -78,19 +79,19 @@ func (lab *Labyrinth) Prim(seed int64) {
 
 //all neighbours(left, right, top, bottom) of a given Point will be passed to AddNeighbour
 func(lab *Labyrinth) Neighbours(point *Point, frontier *[]Point) {
-	lab.AddNeighbour(*point.x + 1, *point.y    , *point.parent, &frontier)
-	lab.AddNeighbour(*point.x - 1, *point.y    , *point.parent, &frontier)
-	lab.AddNeighbour(*point.x    , *point.y + 1, *point.parent, &frontier)
-	lab.AddNeighbour(*point.x    , *point.y - 1, *point.parent, &frontier)
+	lab.AddNeighbour(point.x + 1, point.y  	 , point, frontier)
+	lab.AddNeighbour(point.x - 1, point.y 	 , point, frontier)
+	lab.AddNeighbour(point.x    , point.y + 1,point, frontier)
+	lab.AddNeighbour(point.x    , point.y - 1,point, frontier)
 }
 
 
 //adds the Neighbours af a give point to the frontier list which is used in the maze generation algorithm
-func(lab *Labyrinth) AddNeighbour(x int, y int, parent Point, frontier *[]Point) {
+func(lab *Labyrinth) AddNeighbour(x int, y int, parent *Point, frontier *[]Point) {
 	if !pointMap[Point{x, y, parent}] {
-		if (x > 0 && x < lab.width - 1) && (y > 0 && y < lab.heigth - 1) {
-			pointToBeAdd := Point{x, y, &parent}
-			frontier = append(frontier, pointToBeAdd)
+		if (x > 0 && x < lab.width - 1) && (y > 0 && y < lab.height - 1) {
+			pointToBeAdd := Point{x, y, parent}
+			*frontier = append(*frontier, pointToBeAdd)
 			pointMap[pointToBeAdd] = true
 		}
 	}
@@ -102,13 +103,13 @@ func(lab *Labyrinth) AddBorder() {
 
 }
 
-// IsTreasure 25% to place a treasure at a dead-end in the maze
-func(lab *Labyrinth) IsTreasure(x int, y int) bool {
+//Determines if a given point has 3 neighnours that are "wall" cells
+func(lab *Labyrinth) IsDeadEnd(situation [4]string) bool {
 	return true
 }
 
-//Determines if a given point has 3 neighnours that are "wall" cells
-func(lab *Labyrinth) IsDeadEnd(situation [4]string) bool {
+// IsTreasure 25% to place a treasure at a dead-end in the maze
+func(lab *Labyrinth) IsTreasure(x int, y int) bool {
 	return true
 }
 
