@@ -102,7 +102,7 @@ type Character struct {
 
 }
 
-//Function will update character's currentMana to a hiegher value
+//Function will update character's currentMana to a higher value
 func (hero Character) RegenMana() {
 
 }
