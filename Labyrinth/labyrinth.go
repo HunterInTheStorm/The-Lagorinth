@@ -16,7 +16,10 @@ var wall string = "0"
 var pass string = " "
 var treasure string = "$"
 var trap string = "*"
+var startPosition string = "@"
 var pointMap = map[Point]bool{}
+var chanceToBeTreasure int = 25
+var chanceToBeTrap int = 10
 
 //The structure has 3 fields:
 //	integers for X and Y coordinates
@@ -51,7 +54,7 @@ func (lab *Labyrinth) Prim(seed int64) {
 	frontier := make([]Point, 0, 40)
 	rand.Seed(seed)
 	start := Point{rand.Intn(lab.width - 1) + 1, rand.Intn(lab.width - 1) + 1, nil}
-	lab.labyrinth[start.x][start.y] = trap
+	lab.labyrinth[start.x][start.y] = startPosition
 	lab.Neighbours(&start, &frontier)
 	for {
 		randomPoint := rand.Intn(len(frontier))
@@ -97,38 +100,55 @@ func(lab *Labyrinth) AddNeighbour(x int, y int, parent *Point, frontier *[]Point
 	}
 }
 
-//This function will make all outher cells of the maze "wall" cells
-//unless the algorithm is improved enough so that this step becomes obsolete
-func(lab *Labyrinth) AddBorder() {
-
+func(lab *Labyrinth) CountWalls(x int, y int) int {
+	var wallCount int = 0
+	if lab.labyrinth[x + 1][y] == wall {
+		wallCount++
+	}
+	if lab.labyrinth[x - 1][y] == wall {
+		wallCount++
+	}
+	if lab.labyrinth[x][y + 1] == wall {
+		wallCount++
+	}
+	if lab.labyrinth[x][y - 1] == wall {
+		wallCount++
+	}
+	return wallCount
 }
 
 //Determines if a given point has 3 neighnours that are "wall" cells
-func(lab *Labyrinth) IsDeadEnd(situation [4]string) bool {
-	return true
+func(lab *Labyrinth) IsDeadEnd(x int, y int) bool {
+	return lab.CountWalls(x, y) == 3
 }
 
 // IsTreasure 25% to place a treasure at a dead-end in the maze
-func(lab *Labyrinth) IsTreasure(x int, y int) bool {
-	return true
+func(lab *Labyrinth) IsTreasure() bool {
+	return rand.Intn(100) < chanceToBeTreasure
 }
 
 //places a "T" for treasure in the 2d array at x and y coordinates
-func(lab *Labyrinth) CreateTreasure(x int, y int) {
-
+func(lab *Labyrinth) CreateTreasuresAndTraps() {
+	for i := 1; i < lab.width - 1; i++ {
+		for j := 1; j < lab.height - 1; j++ {
+			if lab.labyrinth[i][j] == pass {
+				if lab.IsDeadEnd(i, j) && lab.IsTreasure() {
+					lab.labyrinth[i][j] = treasure
+				}
+				if lab.IsCrossRoad(i, j) && lab.IsTrap() {
+					lab.labyrinth[i][j] = trap
+				}
+			}
+		}
+	}
 }
 
 //Determines if a given point is a crossroad, a point that has 1 or 0 neighbours that are "wall" cells
-func(lab *Labyrinth) IsCrossRoad(situation [4]string) bool {
-	return true
+func(lab *Labyrinth) IsCrossRoad(x int, y int) bool {
+	return lab.CountWalls(x, y) < 2
 }
 
 //at a given crossroad randoms whethere the tile will be a trap
-func(lab *Labyrinth) IsTrap(x int, y int,) bool {
-	return true
-}
-
-//creates a trap at give coordinates
-func(lab *Labyrinth) CreateTrap(x int, y int) {
-
+func(lab *Labyrinth) IsTrap() bool {
+	return rand.Intn(100) < chanceToBeTrap
 }
