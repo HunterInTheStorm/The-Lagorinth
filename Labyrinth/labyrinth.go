@@ -9,7 +9,6 @@
 
 package Labyrinth
 
-
 import "math/rand"
 
 var wall string = "0"
@@ -36,7 +35,6 @@ func (point Point) Opposite() Point {
 	return Point{2 * point.x - point.parent.x, 2 * point.y - point.parent.y, &point}
 }
 
-
 //The stucture has two fields:
 //integers width and height of the labyrinth/2D array
 //2D array of strings(of characters) which will represent the generated maze
@@ -45,7 +43,6 @@ type Labyrinth struct{
 	//rng int
 	labyrinth [40][40]string
 }
-
 
 //The main algorithm used to generate the maze
 //"0" for wall cells
@@ -124,7 +121,7 @@ func(lab *Labyrinth) IsDeadEnd(x int, y int) bool {
 
 // IsTreasure 25% to place a treasure at a dead-end in the maze
 func(lab *Labyrinth) IsTreasure() bool {
-	return rand.Intn(100) < chanceToBeTreasure
+	return rand.Intn(100) < chanceToBeTreasure 
 }
 
 //places a "T" for treasure in the 2d array at x and y coordinates

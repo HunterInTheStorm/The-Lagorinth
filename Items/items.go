@@ -1,4 +1,4 @@
-package main
+package Items
 
 //This structure has 4 fields:
 //minimum and maximum damage of the weapon represented by integers
@@ -11,22 +11,9 @@ type Weapon struct {
 
 //return and integer between minimum and maximum damage
 func (weapon Weapon) Damage() int {
-
+	return rand.Intn(weapon.maxDmg + 1 - weapon.minDmg) + wepon.minDmg
 }
-
-//description of the item to be ppresented to the player while playing the game
-//MOVE TO INTERFACE
-func (weapon Weapon) Description() string {
-	return ""
-}
-
 
 type Armor struct {
 	defence, health, evasion int
-}
-
-//description of the item to be ppresented to the player while playing the game
-//MOVE TO INTERFACE
-func (armor Armor) Description() string {
-	return ""
 }
