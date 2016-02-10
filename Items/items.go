@@ -11,7 +11,7 @@ type Weapon struct {
 
 //return and integer between minimum and maximum damage
 func (weapon Weapon) Damage() int {
-	return rand.Intn(weapon.maxDmg + 1 - weapon.minDmg) + wepon.minDmg
+	return rand.Intn(weapon.maxDmg + 1 - weapon.minDmg) + wepon.minDmg + weapon.bonusDmg
 }
 
 type Armor struct {
