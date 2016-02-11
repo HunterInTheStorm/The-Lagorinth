@@ -11,14 +11,13 @@ type Game struct {
 	gameCompleted bool
 	monsters []NPC
 	traps []Traps
-	mimics []Mimic
 	start Point
 	end Point
 	score int
 	turns int
 	monsterSlain int
 	chestsLooted int
-	trapsDisarmed
+	trapsDisarmed int
 }
 
 
@@ -36,6 +35,8 @@ func (game Game) CreatePaladin() {
 func (game Game) CreateMage() {
 
 }
+
+//Add some function for chace go hit/evade
 
 //this function will create one of the 3 classes for the player
 func (game Game) CreateRouge() {

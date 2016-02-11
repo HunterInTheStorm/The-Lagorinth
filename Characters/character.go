@@ -1,4 +1,4 @@
-package main
+package Characters
 
 type NPC struct {
 	loaction *Point
@@ -7,12 +7,14 @@ type NPC struct {
 	orientation *Point
 	weapon *Weapon
 	armor *armor
-	dmgMultuplier float
+	dmgMultuplier float32
 	defence, evasion, critChance int
-	currentHealth, maxHealth, healthRegen float
+	currentHealth, maxHealth, healthRegen float32
+	currentMana, maxMana, manaRegen float32
 	visionRadious int
 	isStunned bool
 	flyingVision bool
+	buffs map[int]*Buff
 }
 
 //a npc will move one forward depemding on its orientation
@@ -62,23 +64,27 @@ func (npc *NPC) UnequipWeapon() {
 
 //add all of the values of a armor's properties to the character's
 func (npc *NPC) EquipArmor(newArmor *Armor) {
-	npc.UnequipArmor
+	npc.UnequipArmor()
 	npc.armor = newArmor
 	npc.currentHealth = npc.currentHealth + armor.health
 	npc.maxHealth = npc.maxHealth + armor.health
+	npc.currentMana = npc.currentMana + npc.armor.mana
+	npc.maxMana = npc.maxMana + npc.armor.mana
 }
 
 //remove all of the values of a armor's properties from the character's
 func (npc *NPC) UnequipArmor() {
 	if npc.armor != nil {
-		npc.currentHealth = npc.currentHealth - armor.health
-		npc.maxHealth = npc.maxHealth - armor.health
+		npc.currentHealth = npc.currentHealth - npc.armor.health
+		npc.maxHealth = npc.maxHealth - npc.armor.health
+		npc.currentMana = npc.currentMana - npc.armor.mana
+		npc.maxMana = npc.maxMana - npc.armor.mana
 		npc.armor = nil
 	}
 }
 
 //the function returns the damage(integer) the character will do to an enemy
-func (npc *NPC) DoDamage() float {
+func (npc *NPC) DoDamage() float32 {
 	if rand.Intn(100) < npc.critChance + npc.weapon.bonusCritChance {
 		return 2 * npc.dmgMultuplier * npc.weapon.Damage()
 	}
@@ -86,8 +92,8 @@ func (npc *NPC) DoDamage() float {
 }
 
 //the function substracs the funcyion's argument "damage" from the characters currentHealth
-func (npc *NPC) TakeDamage(damage flaot) {
-	var damageTaken float
+func (npc *NPC) TakeDamage(damage float32) {
+	var damageTaken float32
 	if damage - npc.defence + npc.armor.defence > 0 {
 		npc.currentHealth = npc.currentHealth - damageTaken
 	}
@@ -101,19 +107,20 @@ func (npc *NPC) RegenHealth() {
 	}
 }
 
+//Function will update character's currentMana to a higher value
+func (npc *NPC) RegenMana() {
+	npc.currentMana = npc.currentMana + npc.manaRegen + npc.armor.manaRegen
+	if npc.currentMana > npc.maxMana {
+		npc.currentMana = npc.maxMana
+	}
+}
+
 type Character struct {
 	base *NPC
 	className string
-	currentMana, maxMana int
 	spellLList []Spell
-	memory []struct(point Point, duration int}
+	memory map[Point]int
 	memoryDuration int
-
-}
-
-//Function will update character's currentMana to a higher value
-func (hero *Character) RegenMana() {
-
 }
 
 //will replace the bonuses given from one weapon for the bonuses of another
@@ -127,12 +134,20 @@ func (hero *Character) SwapArmor() {
 }
 
 //a spell from the list of targetble spells will be envoked
-func (hero *Character) UseTargetSpell() {
+func (hero *Character) UseProjectileSpell() Projectile {
 
 }
 
 //a spell from the list of selfcast spells will be envoked
-func (hero *Character) UseSelfTargetSpell() {
+func (hero *Character) UseSelfTargetSpell() Buff {
+
+}
+
+func (hero *Character) UseAreaOfEffectSpell() Effect {
+
+}
+
+func (hero *Character) UseInstantSpell() {
 
 }
 
@@ -146,34 +161,6 @@ func(hero *Character) MemorizeLabyrinth(points []Point) {
 func(hero *Character) UpdateMemory(){
 
 }
-
-type Mimic struct {
-	currentHealth, maxHealth int
-	x,y int
-	orientation *Point
-	symbol string
-}
-
-//the function returns the damage(integer) the character will do to an enemy
-func (mimic Mimic) DoDamage() int {
-	return 0
-}
-
-//the function substracs the funcyion's argument "damage" from the characters currentHealth
-func (mimic Mimic) TakeDamage(damage int) {
-
-}
-
-//function will determine whether the character is hit or not
-func (mimic Mimic) WillBeHit() bool {
-	return false
-}
-
-//function determies whether the character will hit or not
-func (mimic Mimic) WillHit() bool {
-	return true
-}
-
 
 type Trap struct {
 	x, y int
@@ -194,3 +181,42 @@ func (trap Trap) DoDamage() int {
 func (trap Trap) SpawnMonsters() Point {
 	return Point{0,0}
 }
+
+func (trap Trap) TeleportPlayer(hero *Character ) Point, Point {
+
+}
+
+func (trap Trap) WhipeMemory(hero *Character) Point {
+
+}
+
+func (trap Trap) WhipeMemoryAndTeleport(hero *Character) Point, Point {
+
+}
+
+// type Mimic struct {
+// 	currentHealth, maxHealth int
+// 	x,y int
+// 	orientation *Point
+// 	symbol string
+// }
+
+// //the function returns the damage(integer) the character will do to an enemy
+// func (mimic Mimic) DoDamage() int {
+// 	return 0
+// }
+
+// //the function substracs the funcyion's argument "damage" from the characters currentHealth
+// func (mimic Mimic) TakeDamage(damage int) {
+
+// }
+
+// //function will determine whether the character is hit or not
+// func (mimic Mimic) WillBeHit() bool {
+// 	return false
+// }
+
+// //function determies whether the character will hit or not
+// func (mimic Mimic) WillHit() bool {
+// 	return true
+// }
