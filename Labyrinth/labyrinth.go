@@ -7,52 +7,48 @@
 	for where to place truesures(in dead-ends of the maze) and traps(on crossroads) 
 */
 
+
+
 package Labyrinth
 
+import "github.com/golang/The-Lagorinth/Point"
 import "math/rand"
 
-var wall string = "0"
-var pass string = " "
-var treasure string = "$"
-var trap string = "*"
-var startPosition string = "@"
-var pointMap = map[Point]bool{}
+var Wall string = "0"
+var Pass string = " "
+var Treasure string = "$"
+var Trap string = "*"
+var Monster string = "i"
+var ExitPosition string = "E"
+var StartPosition string = "S"
+var pointMap = map[Point.Point]bool{}
 var chanceToBeTreasure int = 25
 var chanceToBeTrap int = 10
+var chanceToBeNpc int = 15
 
 //The structure has 3 fields:
 //	integers for X and Y coordinates
 //	field for parent Point
-type Point struct{
-	x,y int
-	parent *Point
-}
 
-//This function returns the opposite of a given Point given its Parent Point
-//The returned Point is used for our maze generation sequence
-//refer to Prim's algorithm for more details
-func (point Point) Opposite() Point {
-	return Point{2 * point.x - point.parent.x, 2 * point.y - point.parent.y, &point}
-}
 
 //The stucture has two fields:
 //integers width and height of the labyrinth/2D array
 //2D array of strings(of characters) which will represent the generated maze
 type Labyrinth struct{
-	width, height int
+	Width, Height int
 	//rng int
-	labyrinth [40][40]string
+	Labyrinth [40][40]string
 }
 
 //The main algorithm used to generate the maze
 //"0" for wall cells
 //" " for empty cells(a.k.a path)
 func (lab *Labyrinth) Prim(seed int64) {
-	frontier := make([]Point, 0, 40)
+	frontier := make([]Point.Point, 0, 40)
 	rand.Seed(seed)
-	start := Point{rand.Intn(lab.width - 1) + 1, rand.Intn(lab.width - 1) + 1, nil}
-	lab.labyrinth[start.x][start.y] = startPosition
-	lab.Neighbours(&start, &frontier)
+	var start Point.Point = Point.Point{rand.Intn(lab.Width - 1) + 1, rand.Intn(lab.Width - 1) + 1, nil}
+	lab.Labyrinth[start.X][start.Y] = StartPosition
+	lab.neighbours(&start, &frontier)
 	for {
 		randomPoint := rand.Intn(len(frontier))
 		current := frontier[randomPoint]
@@ -61,91 +57,107 @@ func (lab *Labyrinth) Prim(seed int64) {
 		opposite := current.Opposite()
 		last := opposite
 		
-		if lab.labyrinth[opposite.x][opposite.y] == wall {
-			lab.labyrinth[current.x][current.y] = pass
+		if lab.Labyrinth[opposite.X][opposite.Y] == Wall {
+			lab.Labyrinth[current.X][current.Y] = Pass
 
-			if opposite.x != 0 && opposite.x != lab.width - 1 && opposite.y != 0 && opposite.y != lab.height - 1 {
-				lab.labyrinth[opposite.x][opposite.y] = pass
+			if opposite.X != 0 && opposite.X != lab.Width - 1 && opposite.Y != 0 && opposite.Y != lab.Height - 1 {
+				lab.Labyrinth[opposite.X][opposite.Y] = Pass
 			}
 
-			lab.Neighbours(&opposite, &frontier)
+			lab.neighbours(&opposite, &frontier)
 		}
 		if len(frontier) == 0 {
-			lab.labyrinth[last.x][last.y] = "E"
+			lab.Labyrinth[last.X][last.Y] = "E"
 			break
 		}
 	}
+	lab.createTreasuresAndTraps()
 }
 
 //all neighbours(left, right, top, bottom) of a given Point will be passed to AddNeighbour
-func(lab *Labyrinth) Neighbours(point *Point, frontier *[]Point) {
-	lab.AddNeighbour(point.x + 1, point.y  	 , point, frontier)
-	lab.AddNeighbour(point.x - 1, point.y 	 , point, frontier)
-	lab.AddNeighbour(point.x    , point.y + 1,point, frontier)
-	lab.AddNeighbour(point.x    , point.y - 1,point, frontier)
+func(lab *Labyrinth) neighbours(point *Point.Point, frontier *[]Point.Point) {
+	lab.addNeighbour(point.X + 1, point.Y  	 , point, frontier)
+	lab.addNeighbour(point.X - 1, point.Y 	 , point, frontier)
+	lab.addNeighbour(point.X    , point.Y + 1,point, frontier)
+	lab.addNeighbour(point.X    , point.Y - 1,point, frontier)
 }
 
 
 //adds the Neighbours af a give point to the frontier list which is used in the maze generation algorithm
-func(lab *Labyrinth) AddNeighbour(x int, y int, parent *Point, frontier *[]Point) {
-	if !pointMap[Point{x, y, parent}] {
-		if (x > 0 && x < lab.width - 1) && (y > 0 && y < lab.height - 1) {
-			pointToBeAdd := Point{x, y, parent}
+func(lab *Labyrinth) addNeighbour(x int, y int, parent *Point.Point, frontier *[]Point.Point) {
+	if !pointMap[Point.Point{x, y, parent}] {
+		if (x > 0 && x < lab.Width - 1) && (y > 0 && y < lab.Height - 1) {
+			pointToBeAdd := Point.Point{x, y, parent}
 			*frontier = append(*frontier, pointToBeAdd)
 			pointMap[pointToBeAdd] = true
 		}
 	}
 }
 
-func(lab *Labyrinth) CountWalls(x int, y int) int {
+func(lab *Labyrinth) countWalls(x int, y int) int {
 	var wallCount int = 0
-	if lab.labyrinth[x + 1][y] == wall {
+	if lab.Labyrinth[x + 1][y] == Wall {
 		wallCount++
 	}
-	if lab.labyrinth[x - 1][y] == wall {
+	if lab.Labyrinth[x - 1][y] == Wall {
 		wallCount++
 	}
-	if lab.labyrinth[x][y + 1] == wall {
+	if lab.Labyrinth[x][y + 1] == Wall {
 		wallCount++
 	}
-	if lab.labyrinth[x][y - 1] == wall {
+	if lab.Labyrinth[x][y - 1] == Wall {
 		wallCount++
 	}
 	return wallCount
 }
 
 //Determines if a given point has 3 neighnours that are "wall" cells
-func(lab *Labyrinth) IsDeadEnd(x int, y int) bool {
-	return lab.CountWalls(x, y) == 3
+func(lab *Labyrinth) isDeadEnd(x int, y int) bool {
+	return lab.countWalls(x, y) == 3
 }
 
 // IsTreasure 25% to place a treasure at a dead-end in the maze
-func(lab *Labyrinth) IsTreasure() bool {
+func(lab *Labyrinth) isTreasure() bool {
 	return rand.Intn(100) < chanceToBeTreasure 
 }
 
+func(lab *Labyrinth) placeNpc(x int, y int) {
+	if rand.Intn(100) < chanceToBeNpc {
+		lab.Labyrinth[x][y] = Monster
+	}
+}
+
 //places a "T" for treasure in the 2d array at x and y coordinates
-func(lab *Labyrinth) CreateTreasuresAndTraps() {
-	for i := 1; i < lab.width - 1; i++ {
-		for j := 1; j < lab.height - 1; j++ {
-			if lab.labyrinth[i][j] == pass {
-				if lab.IsDeadEnd(i, j) && lab.IsTreasure() {
-					lab.labyrinth[i][j] = treasure
+func(lab *Labyrinth) createTreasuresAndTraps() {
+	for i := 1; i < lab.Width - 1; i++ {
+		for j := 1; j < lab.Height - 1; j++ {
+			if lab.Labyrinth[i][j] == Pass {
+				if lab.isDeadEnd(i, j) {
+					if lab.isTreasure() {
+						lab.Labyrinth[i][j] = Treasure
+					} else {
+						lab.placeNpc(i, j)
+					}
 				}
-				if lab.IsCrossRoad(i, j) && lab.IsTrap() {
-					lab.labyrinth[i][j] = trap
+				if lab.isCrossRoad(i, j) {
+					if lab.isTrap() {
+						lab.Labyrinth[i][j] = Trap
+					} else {
+						lab.placeNpc(i, j)
+					}
 				}
 			}
 		}
 	}
 }
 
+
 //Determines if a given point is a crossroad, a point that has 1 or 0 neighbours that are "wall" cells
-func(lab *Labyrinth) IsCrossRoad(x int, y int) bool {
-	return lab.CountWalls(x, y) < 2
+func(lab *Labyrinth) isCrossRoad(x int, y int) bool {
+	return lab.countWalls(x, y) < 2
 }
 
 //at a given crossroad randoms whethere the tile will be a trap
-func(lab *Labyrinth) IsTrap() bool {
+func(lab *Labyrinth) isTrap() bool {
 	return rand.Intn(100) < chanceToBeTrap
 }

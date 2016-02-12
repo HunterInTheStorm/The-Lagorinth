@@ -1,8 +1,11 @@
 package Spells
 
+import "github.com/golang/The-Lagorinth/Point"
+
 var id int = 0
 
 type Spell struct {
+	point Point.Point
 	symbol string
 	spellName string
 	selfTargeted, projectile, areaOfEffect, buff bool
@@ -16,76 +19,82 @@ type Spell struct {
 	cooldownTime int
 }
 
-func (spell Spell) CreateBuff(hero *Character) Buff {
-	buffName string
-	buffID int
-	bonusHealthRegen float32
-	bonusDamageMultiplier float32
-	duration int
-	bonusDamage, bonusDefence, bonusEvasion, bonusCritChance int
+
+
+
+
+
+// func (spell Spell) CreateBuff(hero *Character) Buff {
+// 	buffName string
+// 	buffID int
+// 	bonusHealthRegen float32
+// 	bonusDamageMultiplier float32
+// 	duration int
+// 	bonusDamage, bonusDefence, bonusEvasion, bonusCritChance int
+// }
+
+func (spell Spell) CreateProjectile() Projectile {
+	// pnt := Point{0,1}
+// 	loaction Point
+// 	vector Point
+// 	willStun, canDestroyWall bool
+// 	critChance int
+// 	damage int
+// 	buff *Buff
+	return Projectile{}
 }
 
-func (spell Spell) CreateProjectile(hero *Character) Projectile {
-	loaction Point
-	vector Point
-	willStun, canDestroyWall bool
-	critChance int
-	damage int
-	buff *Buff
-}
+// func (spell Spell) CreateAreaOfEffect(hero *Character) Effect {
+// 	center Point
+// 	radius int
+// 	duration int
+// 	damage int
+// 	buff *Buff
+// }
 
-func (spell Spell) CreateAreaOfEffect(hero *Character) Effect {
-	center Point
-	radius int
-	duration int
-	damage int
-	buff *Buff
-}
-
-func (spell Spell) InstantSpell(hero *Character) {
+// func (spell Spell) InstantSpell(hero *Character) {
 	
-}
-
+// }
 
 
 type Projectile struct {
-	loaction Point
-	vector Point
+	loaction Point.Point
+	vector Point.Point
 	willStun, canDestroyWall bool
 	critChance int
 	damage int
 	buff *Buff
 }
 
-func (spell Projectile) DoDamage(enemy *NPC) float32 {
+// func (spell Projectile) DoDamage() float32 {
 
-}
+// }
 
-func (spell *Projectile) MoveForward() {
+// func (spell *Projectile) MoveForward() {
 
-}
+// }
 
-func (spell Projectile) BuffTarget(enemy *NPC) {
+// func (spell Projectile) BuffTarget() {
 
-}
+// }
 
 
 
 type Effect struct {
-	center Point
+	center Point.Point
 	radius int
 	duration int
 	damage int
 	buff *Buff
 }
 
-func (spell Spell) EffectCharacter(monsters []NPC) {
+// func (spell Effect) EffectCharacter() {
 
-}
+// }
 
-func (spell Projectile) BuffTarget(enemy *NPC) {
+// func (spell Effect) BuffTarget() {
 
-}
+// }
 
 
 
@@ -98,14 +107,14 @@ type Buff struct {
 	bonusDamage, bonusDefence, bonusEvasion, bonusCritChance int
 }
 
-func (buff Buff) ApplyBuff(hero *Character) {
+// func (buff Buff) ApplyBuff() {
 
-}
+// }
 
-func (buff Buff) RemoveBuff(hero *Character) {
+// func (buff Buff) RemoveBuff() {
 
-}
+// }
 
-func (buff Buff) LowerDuration(hero *Character) {
+// func (buff Buff) LowerDuration() {
 
-}
+// }
