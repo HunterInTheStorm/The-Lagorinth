@@ -1,5 +1,6 @@
 package Game
 
+
 import "github.com/golang/The-Lagorinth/Labyrinth"
 import "github.com/golang/The-Lagorinth/Items"
 import "github.com/golang/The-Lagorinth/Spells"
@@ -42,7 +43,12 @@ func(game *Game) chooseClass() string {
 	fmt.Println("What is your profession traveller?")
 	fmt.Println("(Paladin/Mage/Rouge)")
 	reader := bufio.NewReader(os.Stdin)
-	class, _ := reader.ReadString('\n')
+	class, smt := reader.ReadString('\n')
+	fmt.Println("!!!!!!!!!!")
+fmt.Println(class)
+	fmt.Println("!!!!!!!!!!")
+fmt.Println(smt)
+	fmt.Println("!!!!!!!!!!")
 	return class
 }
 
@@ -59,8 +65,10 @@ func(game *Game) chooseBackground() string {
 
 // //this function will create one of the 3 classes for the player
 func (game *Game) createPaladin(charName string, charBackGround string) {
+	fmt.Println("PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALAAAAAAAAAAADIIIIIIIIN")
 	weapon := game.createWeapon()
 	armor := game.createArmor()
+	
 	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
 		&Point.Point{1, 0, nil}, &weapon, &armor, Character.PaladinDmgMultuplier, Character.PaladinDefence, 
 		Character.PaladinEvasion,Character.PaladinCritChance, Character.PaladinMaxHealth, 
@@ -73,7 +81,8 @@ func (game *Game) createPaladin(charName string, charBackGround string) {
 }
 
 // //this function will create one of the 3 classes for the player
-func (game *Game) CreateMage(charName string, charBackGround string) {
+func (game *Game) createMage(charName string, charBackGround string) {
+	fmt.Println("ROUGEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEe")
 	weapon := game.createWeapon()
 	armor := game.createArmor()
 	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
@@ -89,7 +98,8 @@ func (game *Game) CreateMage(charName string, charBackGround string) {
 // //Add some function for chace go hit/evade
 
 // //this function will create one of the 3 classes for the player
-func (game *Game) CreateRouge(charName string, charBackGround string) {
+func (game *Game) createRouge(charName string, charBackGround string) {
+	fmt.Println("ABRRRAAAAAAAAAAAAAAAAKAAAAAAAADABRA")
 	weapon := game.createWeapon()
 	armor := game.createArmor()
 	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
@@ -105,15 +115,18 @@ func (game *Game) CreateRouge(charName string, charBackGround string) {
 // //this function will handle user input adn desired character creation
 func (game *Game) createHero() {
 	charName := game.chooseName()
-	charClass := game.chooseClass()
+	charClass := string(game.chooseClass())
 	charBackGround := game.chooseBackground()
 	switch charClass {
-	case Character.PaladinClassName:
+	case "Paladin":
+		fmt.Print(charClass)
 		game.createPaladin(charName, charBackGround)
-	case Character.RougeClassName:
-		game.CreateRouge(charName, charBackGround)
-	case Character.MageClassName:
-		game.CreateMage(charName, charBackGround)
+	case "Rouge":
+		fmt.Print(charClass)
+		game.createRouge(charName, charBackGround)
+	case "Mage":
+		fmt.Print(charClass)
+		game.createMage(charName, charBackGround)
 	}
 }
 
@@ -155,20 +168,59 @@ func (game *Game) createHero() {
 // 	return NPC{}
 // }
 
-// //function takes user input and send it to PlayerActionEvent
-// func (game *Game) PlayerAction() {
-
-// }
+func (game *Game) characterMoveTo(char *Character.NPC, x int, y int) {
+	char.Location.X = x
+	char.Location.Y = y
+}
 
 // //given a user input the function handles the desired action the player wants to performe
-// func (game *Game) PlyerActionEvent(action string) {
+func (game *Game) plyerActionEvent(x int, y int) {
+	switch game.labyrinth.Labyrinth[x][y] {
+	case Labyrinth.Pass:
+		game.characterMoveTo(game.player.Base, x, y)
+	case Labyrinth.StartPosition:
+		game.characterMoveTo(game.player.Base, x, y)
+	case Labyrinth.Monster:
+		//fight the beast
+	case Labyrinth.Trap:
+		//disarm the trap or lose an arm
+	case Labyrinth.Treasure:
+		//get the loot
+	case Labyrinth.ExitPosition:
+		//exit
+	}
+	// return ""
+}
 
-// }
-
-// //function replaces an element fro the 2d array for the maze with the character symbol
-// func (game *Game) DrawCharacters() {
-
-// }
+//function takes user input and send it to PlayerActionEvent
+func (game *Game) playerAction(key string) {
+	//restore maze here??
+	fmt.Println(key)
+	switch key {
+	case "w":
+		game.plyerActionEvent(game.player.Base.Location.X + 1, game.player.Base.Location.Y)
+	case "a":
+		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y - 1)
+	case "s":
+		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y + 1)
+	case "d":
+		game.plyerActionEvent(game.player.Base.Location.X - 1, game.player.Base.Location.Y)
+	case "1":
+		fmt.Println("SO FAR SO GOOD, SPELL CAST 1")
+	case "2":
+		fmt.Println("SO FAR SO GOOD, SPELL CAST 2")
+	case "3":
+		fmt.Println("SO FAR SO GOOD, SCELL CAST 3")
+	case "4":
+		fmt.Println("SO FAR SO GOOD, CAMERA MOVEMENT LEFT")
+	case "5":
+		fmt.Println("SO FAR SO GOOD, CAMERA MOVEMENT DOWN")
+	case "6":
+		fmt.Println("SO FAR SO GOOD, CAMERA MOVEMETN RIGHT")
+	case "8":
+		fmt.Println("SO FAR SO GOOD,CAMERA MOVEMENT UP")
+	}
+}
 
 // //function to restore the original state of the 2d maze array
 // func (game *Game) RestoreLabyrinth(x, y int) {
@@ -276,6 +328,52 @@ func (game *Game) initialize() {
 	game.createHero()
 }
 
+
+// func (game *Game) printdata() {
+// 	fmt.Println("playerDefeted")
+// 	fmt.Println(game.playerDefeted)
+// 	fmt.Println("gameCompleted")
+// 	fmt.Println(game.gameCompleted)
+// 	fmt.Println("score")
+// 	fmt.Println(game.score)
+// 	fmt.Println("turns")
+// 	fmt.Println(game.turns)
+// 	fmt.Println("monsterSlain")
+// 	fmt.Println(game.monsterSlain)
+// 	fmt.Println("chestsLooted")
+// 	fmt.Println(game.chestsLooted)
+// 	fmt.Println("trapsDisarmed")
+// 	fmt.Println(game.trapsDisarmed)
+// 	fmt.Println("start")
+// 	fmt.Println(game.start)
+// 	fmt.Println("end")
+// 	fmt.Println(game.end)
+// 	fmt.Println("monsterList")
+// 	fmt.Println(game.monsterList)
+// 	fmt.Println("trapList")
+// 	fmt.Println(game.trapList)
+// 	fmt.Println("player")
+// 	fmt.Println(game.player)
+// }
+
+// //function replaces an element fro the 2d array for the maze with the character symbol
+func (game *Game) drawCharacters() {
+	fmt.Println("ASDFASf")
+	// game.printdata()
+	fmt.Println("ASDFASf")
+	// fmt.Println(game.player.Base.Location.Y)
+	// fmt.Println("ASDFASf")
+	game.labyrinth.Labyrinth[game.player.Base.Location.X][game.start.Y] = Labyrinth.CharSymbol
+	for trapPoint, _ := range game.trapList {
+		game.labyrinth.Labyrinth[trapPoint.X][trapPoint.Y] = Labyrinth.Trap
+	}
+	//add projectile here
+	for _, mon := range game.monsterList {
+		game.labyrinth.Labyrinth[mon.Location.X][mon.Location.Y] = Labyrinth.Monster
+	}
+
+}
+
 //function to draw the labyrinth
 func (game *Game) drawLabyrinth() {
 	for i := 0; i < game.labyrinth.Width; i++ {
@@ -286,13 +384,21 @@ func (game *Game) drawLabyrinth() {
 	}
 }
 
+func (game *Game) detectKeyPress() string{
+	reader := bufio.NewReader(os.Stdin)
+	key, _ := reader.ReadString('\n')
+	return key
+}
+
 //main loop cycle for the game
 func (game *Game) Run() {
 	game.initialize()
 
 	for  {
+		game.drawCharacters()
 		game.drawLabyrinth()
-		break
+		key := game.detectKeyPress()
+		game.playerAction(key)
 		if game.playerDefeted || game.gameCompleted {
 			break
 		}
