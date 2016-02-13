@@ -7,6 +7,9 @@ import "github.com/golang/The-Lagorinth/Characters"
 import "github.com/golang/The-Lagorinth/Point"
 import "time"
 import "fmt"
+import "math/rand"
+import "os"
+import "bufio"
 
 //This structure discribes the rules of the game concerning character creation,
 //player and npc movement, contain various array to trac monsters, traps and mimics,
@@ -24,52 +27,95 @@ type Game struct {
 	monsterList []*Character.NPC
 	trapList map[Point.Point]*Character.Trap
 	labyrinth *Labyrinth.Labyrinth
-	player *Character.Character
+	player *Character.Hero
 }
 
 
-// //this function will handle user input adn desired character creation
-// func (game *Game) CreateCharacter() {
+func(game *Game) chooseName() string {
+	fmt.Println("What is your name mighty adventurer?")
+ 	reader := bufio.NewReader(os.Stdin)
+	name, _ := reader.ReadString('\n')
+	return name
+}
 
-// }
+func(game *Game) chooseClass() string {
+	fmt.Println("What is your profession traveller?")
+	fmt.Println("(Paladin/Mage/Rouge)")
+	reader := bufio.NewReader(os.Stdin)
+	class, _ := reader.ReadString('\n')
+	return class
+}
+
+func(game *Game) chooseBackground() string {
+	fmt.Println("And what are you renowned for?")
+	fmt.Println("Giant-like strenght(giant)")
+	fmt.Println("Aagile toreador(toreador)")
+	fmt.Println("World Cartographer(cartographer)")
+	fmt.Println("Wise Librarian(librarian)")
+	reader := bufio.NewReader(os.Stdin)
+	backGround, _ := reader.ReadString('\n')
+	return backGround
+}
 
 // //this function will create one of the 3 classes for the player
-// func (game *Game) CreatePaladin() {
+func (game *Game) createPaladin(charName string, charBackGround string) {
+	weapon := game.createWeapon()
+	armor := game.createArmor()
+	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
+		&Point.Point{1, 0, nil}, &weapon, &armor, Character.PaladinDmgMultuplier, Character.PaladinDefence, 
+		Character.PaladinEvasion,Character.PaladinCritChance, Character.PaladinMaxHealth, 
+		Character.PaladinMaxHealth, Character.PaladinHealthRegen, Character.PaladinMaxMana,
+		Character.PaladinMaxMana, Character.PaladinManaRegen, Character.PaladinVisionRadious, 
+		false, make(map[int]*Spells.Buff)}
 
-// }
+	game.player = &Character.Hero{&base, "Paladin", charBackGround, make([]*Spells.Spell, 0, 3), 
+		make(map[Point.Point]int), Character.PaladinMemoryDuration}
+}
 
 // //this function will create one of the 3 classes for the player
-// func (game *Game) CreateMage() {
+func (game *Game) CreateMage(charName string, charBackGround string) {
+	weapon := game.createWeapon()
+	armor := game.createArmor()
+	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
+		&Point.Point{1, 0, nil}, &weapon, &armor, Character.MageDmgMultuplier, Character.MageDefence, 
+		Character.MageEvasion, Character.MageCritChance, Character.MageMaxHealth, Character.MageMaxHealth,
+		Character.MageHealthRegen, Character.MageMaxMana, Character.MageMaxMana, Character.MageManaRegen, 
+		Character.MageVisionRadious, false, make(map[int]*Spells.Buff)}
 
-// }
+	game.player = &Character.Hero{&base, "Mage", charBackGround, make([]*Spells.Spell, 0, 3), 
+		make(map[Point.Point]int), Character.MageMemoryDuration}
+}
 
 // //Add some function for chace go hit/evade
 
 // //this function will create one of the 3 classes for the player
-// func (game *Game) CreateRouge() {
+func (game *Game) CreateRouge(charName string, charBackGround string) {
+	weapon := game.createWeapon()
+	armor := game.createArmor()
+	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
+		&Point.Point{1, 0, nil}, &weapon, &armor, Character.RougeDmgMultuplier, Character.RougeDefence, 
+		Character.RougeEvasion, Character.RougeCritChance, Character.RougeMaxHealth, Character.RougeMaxHealth, 
+		Character.RougeHealthRegen, Character.RougeMaxMana, Character.RougeMaxMana, Character.RougeManaRegen, 
+		Character.RougeVisionRadious, false, make(map[int]*Spells.Buff)}
 
-// }
-
-// //function will handle choice of backgroung for the character and applying the coresponding bonuses
-// func (game *Game) ChooseBackground() {
-
-// }
-
-// the function will create the monsters in the maze
-func (game *Game) createMonster(x int, y int) Character.NPC{
-	return Character.NPC{&Point.Point{x, y, nil}, Labyrinth.Monster, "Skeletron", &Point.Point{-1, 0, nil},
-	&Items.Weapon{3,4,5,6}, &Items.Armor{2,3,3.1,3.2,3.2,3.4}, 3.2,  1, 1, 1, 31.1, 31.1, 31.1, 31.1, 31.1, 31.1, 4, false, false, make(map[int]*Spells.Buff)}
+	game.player = &Character.Hero{&base, "Rouge", charBackGround, make([]*Spells.Spell, 0, 3), 
+		make(map[Point.Point]int), Character.RougeMemoryDuration}
 }
 
-// the function will create the traps in the maze
-func (game *Game) createTrap(x int, y int) Character.Trap{
-	return Character.Trap{&Point.Point{x, y, nil}, 0, false, false, 0 , 0}
+// //this function will handle user input adn desired character creation
+func (game *Game) createHero() {
+	charName := game.chooseName()
+	charClass := game.chooseClass()
+	charBackGround := game.chooseBackground()
+	switch charClass {
+	case Character.PaladinClassName:
+		game.createPaladin(charName, charBackGround)
+	case Character.RougeClassName:
+		game.CreateRouge(charName, charBackGround)
+	case Character.MageClassName:
+		game.CreateMage(charName, charBackGround)
+	}
 }
-
-// // the function will create the maze in the game
-// func (game *Game) CreateLabyrinth() {
-
-// }
 
 // // the function will calculate the final score the player has acheived
 // //depending on turs passed, mosters killed, cheasts looted
@@ -124,16 +170,6 @@ func (game *Game) createTrap(x int, y int) Character.Trap{
 
 // }
 
-//function to draw the labyrinth
-func (game *Game) DrawLabyrinth() {
-	for i := 0; i < game.labyrinth.Width; i++ {
-		for j := 0; j < game.labyrinth.Height; j++ {
-			fmt.Print(game.labyrinth.Labyrinth[i][j])
-		}
-		fmt.Println()
-	}
-}
-
 // //function to restore the original state of the 2d maze array
 // func (game *Game) RestoreLabyrinth(x, y int) {
 
@@ -153,6 +189,37 @@ func (game *Game) DrawLabyrinth() {
 // func (game *Game) Evaluation() {
 // 	return true
 // }
+
+func(game *Game) createArmor() Items.Armor {
+	armor := Items.Armor{}
+	armor.RandomizeArmor()
+	return armor
+}
+
+func(game *Game) createWeapon() Items.Weapon {
+	weapon := Items.Weapon{}
+	weapon.RandomizeWeapon()
+	return weapon
+}
+
+// the function will create the monsters in the maze
+func (game *Game) createMonster(x int, y int) Character.NPC{
+	weapon := game.createWeapon()
+	armor := game.createArmor()
+	//TRANSFER VALUES TO SEPARATE FILE
+	return Character.NPC{&Point.Point{x, y, nil}, Labyrinth.Monster, "Skeleton", &Point.Point{-1, 0, nil},
+	&weapon, &armor, 1,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spells.Buff)}
+}
+
+// the function will create the traps in the maze
+func (game *Game) createTrap(x int, y int) Character.Trap{
+	trapType := Character.TrapTypes[rand.Intn(len(Character.TrapTypes))]
+	detectDiff := rand.Intn(10) + 1
+	disarmDiff := rand.Intn(5) + 1
+	minDmg := rand.Intn(6)
+	maxDmg := rand.Intn(6) + minDmg
+	return Character.Trap{&Point.Point{x, y, nil},trapType,  detectDiff, disarmDiff, false, false, minDmg, maxDmg}
+}
 
 func (game *Game) setGameFieldValues() {
 	game.playerDefeted = false
@@ -205,16 +272,26 @@ func (game *Game) initialize() {
 	game.setGameFieldValues()
 	game.createLabyrinth()
 	game.createMonsterAndTrapsLists()
-	//TRY TO DO SOME MAGIC WITH CHANNELS BY SENDING POINTS WITH LOCATION OF START,END,NPCs,TRAPS	
+	//TRY TO DO SOME MAGIC WITH CHANNELS BY SENDING POINTS WITH LOCATION OF START,END,NPCs,TRAPs
+	game.createHero()
+}
+
+//function to draw the labyrinth
+func (game *Game) drawLabyrinth() {
+	for i := 0; i < game.labyrinth.Width; i++ {
+		for j := 0; j < game.labyrinth.Height; j++ {
+			fmt.Print(game.labyrinth.Labyrinth[i][j])
+		}
+		fmt.Println()
+	}
 }
 
 //main loop cycle for the game
 func (game *Game) Run() {
 	game.initialize()
-	//CREATE PLAER CHARACTER
-	//MAIN LOOP CYCLE
+
 	for  {
-		game.DrawLabyrinth()
+		game.drawLabyrinth()
 		break
 		if game.playerDefeted || game.gameCompleted {
 			break

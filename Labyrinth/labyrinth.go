@@ -19,6 +19,7 @@ var Pass string = " "
 var Treasure string = "$"
 var Trap string = "*"
 var Monster string = "i"
+var CharSymbol string = "c"
 var ExitPosition string = "E"
 var StartPosition string = "S"
 var pointMap = map[Point.Point]bool{}

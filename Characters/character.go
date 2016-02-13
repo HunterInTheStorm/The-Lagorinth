@@ -18,7 +18,6 @@ type NPC struct {
 	CurrentMana, MaxMana, ManaRegen float32
 	VisionRadious int
 	IsStunned bool
-	FlyingVision bool
 	Buffs map[int]*Spells.Buff
 }
 
@@ -120,55 +119,61 @@ func (npc *NPC) RegenMana() {
 	}
 }
 
-type Character struct {
+type Hero struct {
 	Base *NPC
 	ClassName string
-	SpellLList []Spells.Spell
+	BackGround string
+	SpellLList []*Spells.Spell
 	Memory map[Point.Point]int
 	MemoryDuration int
 }
 
 // //will replace the bonuses given from one weapon for the bonuses of another
-// func (hero *Character) SwapWeapon() {
+// func (hero *Hero) SwapWeapon() {
 
 // }
 
 // //will replace the bonuses given from one armor for the bonuses of another
-// func (hero *Character) SwapArmor() {
+// func (hero *Hero) SwapArmor() {
 
 // }
 
 // //a spell from the list of targetble spells will be envoked
-// func (hero *Character) UseProjectileSpell() Projectile {
+// func (hero *Hero) UseProjectileSpell() Projectile {
 
 // }
 
 // //a spell from the list of selfcast spells will be envoked
-// func (hero *Character) UseSelfTargetSpell() Buff {
+// func (hero *Hero) UseSelfTargetSpell() Buff {
 
 // }
 
-// func (hero *Character) UseAreaOfEffectSpell() Effect {
+// func (hero *Hero) UseAreaOfEffectSpell() Effect {
 
 // }
 
-// func (hero *Character) UseInstantSpell() {
+// func (hero *Hero) UseInstantSpell() {
 
 // }
 
 // //given an array of Points the character memory of the labyrinth will be updated with new tiles
 // //that he remebers(tiles that will be displyed)
-// func(hero *Character) MemorizeLabyrinth(points []Point) {
+// func(hero *Hero) MemorizeLabyrinth(points []Point) {
 
 // }
 
 // //values in the memory array will be updated by lowering the duration integer by one 
-// func(hero *Character) UpdateMemory(){
+// func(hero *Hero) UpdateMemory(){
 
 // }
 
+
+var	TrapTypes []string = []string{"DamageTrap","SpawnTrap","TeleportTrap","MemoryWhipeTrap","TabulaRasaTrap"}
+
 type Trap struct {
 	Location *Point.Point
+	TrapType string
+	DetectDifficulty int
 	DisarmDifficulty int
 	IsDisarmed bool
 	DisarmAtempted bool
@@ -190,15 +195,15 @@ type Trap struct {
 // 	return Point{0,0}
 // }
 
-// func (trap Trap) TeleportPlayer(hero *Character ) Point, Point {
+// func (trap Trap) TeleportPlayer(hero *Hero ) Point, Point {
 
 // }
 
-// func (trap Trap) WhipeMemory(hero *Character) Point {
+// func (trap Trap) WhipeMemory(hero *Hero) Point {
 
 // }
 
-// func (trap Trap) WhipeMemoryAndTeleport(hero *Character) Point, Point {
+// func (trap Trap) WhipeMemoryAndTeleport(hero *Hero) Point, Point {
 
 // }
 
