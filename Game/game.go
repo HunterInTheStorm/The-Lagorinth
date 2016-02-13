@@ -11,6 +11,7 @@ import "fmt"
 import "math/rand"
 import "os"
 import "bufio"
+import "strings"
 
 //This structure discribes the rules of the game concerning character creation,
 //player and npc movement, contain various array to trac monsters, traps and mimics,
@@ -36,20 +37,15 @@ func(game *Game) chooseName() string {
 	fmt.Println("What is your name mighty adventurer?")
  	reader := bufio.NewReader(os.Stdin)
 	name, _ := reader.ReadString('\n')
-	return name
+	return strings.Trim(name,"\r\n")
 }
 
 func(game *Game) chooseClass() string {
 	fmt.Println("What is your profession traveller?")
 	fmt.Println("(Paladin/Mage/Rouge)")
 	reader := bufio.NewReader(os.Stdin)
-	class, smt := reader.ReadString('\n')
-	fmt.Println("!!!!!!!!!!")
-fmt.Println(class)
-	fmt.Println("!!!!!!!!!!")
-fmt.Println(smt)
-	fmt.Println("!!!!!!!!!!")
-	return class
+	class, _ := reader.ReadString('\n')
+	return strings.Trim(class,"\r\n")
 }
 
 func(game *Game) chooseBackground() string {
@@ -60,12 +56,11 @@ func(game *Game) chooseBackground() string {
 	fmt.Println("Wise Librarian(librarian)")
 	reader := bufio.NewReader(os.Stdin)
 	backGround, _ := reader.ReadString('\n')
-	return backGround
+	return strings.Trim(backGround,"\r\n")
 }
 
 // //this function will create one of the 3 classes for the player
 func (game *Game) createPaladin(charName string, charBackGround string) {
-	fmt.Println("PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALAAAAAAAAAAADIIIIIIIIN")
 	weapon := game.createWeapon()
 	armor := game.createArmor()
 	
@@ -82,7 +77,6 @@ func (game *Game) createPaladin(charName string, charBackGround string) {
 
 // //this function will create one of the 3 classes for the player
 func (game *Game) createMage(charName string, charBackGround string) {
-	fmt.Println("ROUGEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEe")
 	weapon := game.createWeapon()
 	armor := game.createArmor()
 	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
@@ -99,7 +93,6 @@ func (game *Game) createMage(charName string, charBackGround string) {
 
 // //this function will create one of the 3 classes for the player
 func (game *Game) createRouge(charName string, charBackGround string) {
-	fmt.Println("ABRRRAAAAAAAAAAAAAAAAKAAAAAAAADABRA")
 	weapon := game.createWeapon()
 	armor := game.createArmor()
 	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
@@ -354,15 +347,10 @@ func (game *Game) initialize() {
 // 	fmt.Println(game.trapList)
 // 	fmt.Println("player")
 // 	fmt.Println(game.player)
-// }
+//}
 
 // //function replaces an element fro the 2d array for the maze with the character symbol
 func (game *Game) drawCharacters() {
-	fmt.Println("ASDFASf")
-	// game.printdata()
-	fmt.Println("ASDFASf")
-	// fmt.Println(game.player.Base.Location.Y)
-	// fmt.Println("ASDFASf")
 	game.labyrinth.Labyrinth[game.player.Base.Location.X][game.start.Y] = Labyrinth.CharSymbol
 	for trapPoint, _ := range game.trapList {
 		game.labyrinth.Labyrinth[trapPoint.X][trapPoint.Y] = Labyrinth.Trap
@@ -387,7 +375,7 @@ func (game *Game) drawLabyrinth() {
 func (game *Game) detectKeyPress() string{
 	reader := bufio.NewReader(os.Stdin)
 	key, _ := reader.ReadString('\n')
-	return key
+	return strings.Trim(key,"\r\n")
 }
 
 //main loop cycle for the game
