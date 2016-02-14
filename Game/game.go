@@ -148,43 +148,43 @@ func (game *Game) createHero() {
 
 // }
 
-
-// //this function will handle the fight event
-// func (game *Game) Fight(npc NPC) {
-
-// }
-
 // //this function will find the moster in the list with which the player will engage in combat
-// func (game *Game) FindMonster() NPC{
-// 	return NPC{}
-// }
-
-func (game *Game) restoreTile(x int, y int) {
-	game.labyrinth.Labyrinth[x][y] = Labyrinth.Pass
-	game.labyrinth.Labyrinth[game.start.X][game.start.Y] = Labyrinth.StartPosition
-	game.labyrinth.Labyrinth[game.end.X][game.end.X] = Labyrinth.ExitPosition
+//ADDDDDDDD ERRRRRRRORRRRRRRRRRRRRRRRRRRR
+func (game *Game) findEnemy(requiredX int, requiredY int) *NPC{
+	if game.player.Base.Location.X == requiredX && game.player.Base.Location.Y == requiredY && {
+		return game.player.Base
+	}
+	for _, monster := range game.monsterList {
+		if monster.Location.X == requiredX && monster.Location.Y = requiredY
+		return monster
+	}
+ 	return NPC{}
 }
 
-func (game *Game) characterMoveTo(char *Character.NPC, x int, y int) {
-	fmt.Println(game.player.Base.Location.X)
-	fmt.Println(game.player.Base.Location.Y)
-	char.Location.X = x
-	char.Location.Y = y
-	fmt.Println(x)
-	fmt.Println(y)
-	fmt.Println(game.player.Base.Location.X)
-	fmt.Println(game.player.Base.Location.Y)
+//this function will handle the fight event
+func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
+	enemy := game.findEnemy(enemyX, enemyY)
+	damage := character.DoDamage()
+	armor := enemy.Defence()
+	enemy.TakeDamage(damage)
+}
+
+func (game *Game) characterMoveTo(character *Character.NPC, x int, y int) {
+	character.Location.X = x
+	character.Location.Y = y
 }
 
 // //given a user input the function handles the desired action the player wants to performe
-func (game *Game) plyerActionEvent(x int, y int) {
+func (game *Game) plyerActionEvent(x int, y int, *character Character.NPC) {
 	switch game.labyrinth.Labyrinth[x][y] {
 	case Labyrinth.Pass:
-		game.characterMoveTo(game.player.Base, x, y)
+		game.characterMoveTo(character, x, y)
 	case Labyrinth.StartPosition:
-		game.characterMoveTo(game.player.Base, x, y)
+		game.characterMoveTo(character, x, y)
 	case Labyrinth.Monster:
-		//fight the beast
+		game.fight(character, x, y)
+	case Labyrinth.CharSymbol:
+		game.fight(character, x, y)
 	case Labyrinth.Trap:
 		//disarm the trap or lose an arm
 	case Labyrinth.Treasure:
@@ -192,7 +192,12 @@ func (game *Game) plyerActionEvent(x int, y int) {
 	case Labyrinth.ExitPosition:
 		//exit
 	}
-	// return ""
+}
+
+func (game *Game) restoreTile(x int, y int) {
+	game.labyrinth.Labyrinth[x][y] = Labyrinth.Pass
+	game.labyrinth.Labyrinth[game.start.X][game.start.Y] = Labyrinth.StartPosition
+	game.labyrinth.Labyrinth[game.end.X][game.end.X] = Labyrinth.ExitPosition
 }
 
 //function takes user input and send it to PlayerActionEvent
@@ -200,13 +205,13 @@ func (game *Game) playerAction(key string) {
 	game.restoreTile(game.player.Base.Location.X, game.player.Base.Location.Y)
 	switch key {
 	case "w":
-		game.plyerActionEvent(game.player.Base.Location.X - 1, game.player.Base.Location.Y)
+		game.plyerActionEvent(game.player.Base.Location.X - 1, game.player.Base.Location.Y, game.player.Base)
 	case "a":
-		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y - 1)
+		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y - 1, game.player.Base)
 	case "s":
-		game.plyerActionEvent(game.player.Base.Location.X + 1, game.player.Base.Location.Y)
+		game.plyerActionEvent(game.player.Base.Location.X + 1, game.player.Base.Location.Y, game.player.Base)
 	case "d":
-		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y + 1)
+		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y + 1, game.player.Base)
 	case "e":
 		game.playerDefeted = true
 	case "1":
@@ -332,47 +337,16 @@ func (game *Game) initialize() {
 	game.createHero()
 }
 
-
-// func (game *Game) printdata() {
-// 	fmt.Println("playerDefeted")
-// 	fmt.Println(game.playerDefeted)
-// 	fmt.Println("gameCompleted")
-// 	fmt.Println(game.gameCompleted)
-// 	fmt.Println("score")
-// 	fmt.Println(game.score)
-// 	fmt.Println("turns")
-// 	fmt.Println(game.turns)
-// 	fmt.Println("monsterSlain")
-// 	fmt.Println(game.monsterSlain)
-// 	fmt.Println("chestsLooted")
-// 	fmt.Println(game.chestsLooted)
-// 	fmt.Println("trapsDisarmed")
-// 	fmt.Println(game.trapsDisarmed)
-// 	fmt.Println("start")
-// 	fmt.Println(game.start)
-// 	fmt.Println("end")
-// 	fmt.Println(game.end)
-// 	fmt.Println("monsterList")
-// 	fmt.Println(game.monsterList)
-// 	fmt.Println("trapList")
-// 	fmt.Println(game.trapList)
-// 	fmt.Println("player")
-// 	fmt.Println(game.player)
-//}
-
 // //function replaces an element fro the 2d array for the maze with the character symbol
 func (game *Game) drawCharacters() {
-		fmt.Println(game.player.Base.Location.X)
-	fmt.Println(game.player.Base.Location.Y)
 	game.labyrinth.Labyrinth[game.player.Base.Location.X][game.player.Base.Location.Y] = Labyrinth.CharSymbol
 	for trapPoint, _ := range game.trapList {
 		game.labyrinth.Labyrinth[trapPoint.X][trapPoint.Y] = Labyrinth.Trap
 	}
 	//add projectile here
 	for _, mon := range game.monsterList {
-		game.labyrinth.Labyrinth[mon.Location.X][mon.Location.Y] = Labyrinth.Monster
+		game.labyrinth.Labyrinth[mon.Location.X][mon.Location.Y] = mon.Symbol
 	}
-
 }
 
 //function to draw the labyrinth
