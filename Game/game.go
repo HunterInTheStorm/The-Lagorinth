@@ -10,6 +10,7 @@ import "time"
 import "fmt"
 import "math/rand"
 import "os"
+import "os/exec"
 import "bufio"
 import "strings"
 
@@ -112,13 +113,10 @@ func (game *Game) createHero() {
 	charBackGround := game.chooseBackground()
 	switch charClass {
 	case "Paladin":
-		fmt.Print(charClass)
 		game.createPaladin(charName, charBackGround)
 	case "Rouge":
-		fmt.Print(charClass)
 		game.createRouge(charName, charBackGround)
 	case "Mage":
-		fmt.Print(charClass)
 		game.createMage(charName, charBackGround)
 	}
 }
@@ -161,9 +159,21 @@ func (game *Game) createHero() {
 // 	return NPC{}
 // }
 
+func (game *Game) restoreTile(x int, y int) {
+	game.labyrinth.Labyrinth[x][y] = Labyrinth.Pass
+	game.labyrinth.Labyrinth[game.start.X][game.start.Y] = Labyrinth.StartPosition
+	game.labyrinth.Labyrinth[game.end.X][game.end.X] = Labyrinth.ExitPosition
+}
+
 func (game *Game) characterMoveTo(char *Character.NPC, x int, y int) {
+	fmt.Println(game.player.Base.Location.X)
+	fmt.Println(game.player.Base.Location.Y)
 	char.Location.X = x
 	char.Location.Y = y
+	fmt.Println(x)
+	fmt.Println(y)
+	fmt.Println(game.player.Base.Location.X)
+	fmt.Println(game.player.Base.Location.Y)
 }
 
 // //given a user input the function handles the desired action the player wants to performe
@@ -187,17 +197,18 @@ func (game *Game) plyerActionEvent(x int, y int) {
 
 //function takes user input and send it to PlayerActionEvent
 func (game *Game) playerAction(key string) {
-	//restore maze here??
-	fmt.Println(key)
+	game.restoreTile(game.player.Base.Location.X, game.player.Base.Location.Y)
 	switch key {
 	case "w":
-		game.plyerActionEvent(game.player.Base.Location.X + 1, game.player.Base.Location.Y)
+		game.plyerActionEvent(game.player.Base.Location.X - 1, game.player.Base.Location.Y)
 	case "a":
 		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y - 1)
 	case "s":
-		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y + 1)
+		game.plyerActionEvent(game.player.Base.Location.X + 1, game.player.Base.Location.Y)
 	case "d":
-		game.plyerActionEvent(game.player.Base.Location.X - 1, game.player.Base.Location.Y)
+		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y + 1)
+	case "e":
+		game.playerDefeted = true
 	case "1":
 		fmt.Println("SO FAR SO GOOD, SPELL CAST 1")
 	case "2":
@@ -351,7 +362,9 @@ func (game *Game) initialize() {
 
 // //function replaces an element fro the 2d array for the maze with the character symbol
 func (game *Game) drawCharacters() {
-	game.labyrinth.Labyrinth[game.player.Base.Location.X][game.start.Y] = Labyrinth.CharSymbol
+		fmt.Println(game.player.Base.Location.X)
+	fmt.Println(game.player.Base.Location.Y)
+	game.labyrinth.Labyrinth[game.player.Base.Location.X][game.player.Base.Location.Y] = Labyrinth.CharSymbol
 	for trapPoint, _ := range game.trapList {
 		game.labyrinth.Labyrinth[trapPoint.X][trapPoint.Y] = Labyrinth.Trap
 	}
@@ -383,6 +396,9 @@ func (game *Game) Run() {
 	game.initialize()
 
 	for  {
+		c := exec.Command("cmd", "/c", "cls")
+		c.Stdout = os.Stdout
+		c.Run()
 		game.drawCharacters()
 		game.drawLabyrinth()
 		key := game.detectKeyPress()

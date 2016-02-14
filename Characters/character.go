@@ -94,25 +94,25 @@ func (npc *NPC) ChangeOrientation(x1 int, x2 int, y1 int, y2 int) {
 
 //function that updates the coordinates of an character so that he move one up
 func (npc *NPC) MoveNorth() {
-	npc.Location.X = npc.Location.X + 1
+	npc.Location.X = npc.Location.X - 1
 	npc.ChangeOrientation(npc.Location.X, npc.Location.X - 1, npc.Location.Y, npc.Location.Y)
 }
 
 //function that updates the coordinates of an character so that he move one down
 func (npc *NPC) MoveSouth() {
-	npc.Location.X = npc.Location.X - 1
+	npc.Location.X = npc.Location.X + 1
 	npc.ChangeOrientation(npc.Location.X, npc.Location.X + 1, npc.Location.Y, npc.Location.Y)
 }
 
 //function that updates the coordinates of an character so that he move one left
 func (npc *NPC) MoveWest() {
-	npc.Location.Y = npc.Location.Y + 1
+	npc.Location.Y = npc.Location.Y - 1
 	npc.ChangeOrientation(npc.Location.X, npc.Location.X, npc.Location.Y, npc.Location.Y - 1)
 }
 
 //function that updates the coordinates of an character so that he move one right
 func (npc *NPC) MoveEast() {
-	npc.Location.Y = npc.Location.Y - 1
+	npc.Location.Y = npc.Location.Y + 1
 	npc.ChangeOrientation(npc.Location.X, npc.Location.X, npc.Location.Y, npc.Location.Y + 1)
 }
 
