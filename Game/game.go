@@ -70,7 +70,7 @@ func (game *Game) createPaladin(charName string, charBackGround string) {
 		Character.PaladinEvasion,Character.PaladinCritChance, Character.PaladinMaxHealth, 
 		Character.PaladinMaxHealth, Character.PaladinHealthRegen, Character.PaladinMaxMana,
 		Character.PaladinMaxMana, Character.PaladinManaRegen, Character.PaladinVisionRadious, 
-		false, make(map[int]*Spells.Buff)}
+		false, make(map[int]*Spells.Buff), true}
 
 	game.player = &Character.Hero{&base, "Paladin", charBackGround, make([]*Spells.Spell, 0, 3), 
 		make(map[Point.Point]int), Character.PaladinMemoryDuration}
@@ -84,7 +84,7 @@ func (game *Game) createMage(charName string, charBackGround string) {
 		&Point.Point{1, 0, nil}, &weapon, &armor, Character.MageDmgMultuplier, Character.MageDefence, 
 		Character.MageEvasion, Character.MageCritChance, Character.MageMaxHealth, Character.MageMaxHealth,
 		Character.MageHealthRegen, Character.MageMaxMana, Character.MageMaxMana, Character.MageManaRegen, 
-		Character.MageVisionRadious, false, make(map[int]*Spells.Buff)}
+		Character.MageVisionRadious, false, make(map[int]*Spells.Buff), true}
 
 	game.player = &Character.Hero{&base, "Mage", charBackGround, make([]*Spells.Spell, 0, 3), 
 		make(map[Point.Point]int), Character.MageMemoryDuration}
@@ -100,7 +100,7 @@ func (game *Game) createRouge(charName string, charBackGround string) {
 		&Point.Point{1, 0, nil}, &weapon, &armor, Character.RougeDmgMultuplier, Character.RougeDefence, 
 		Character.RougeEvasion, Character.RougeCritChance, Character.RougeMaxHealth, Character.RougeMaxHealth, 
 		Character.RougeHealthRegen, Character.RougeMaxMana, Character.RougeMaxMana, Character.RougeManaRegen, 
-		Character.RougeVisionRadious, false, make(map[int]*Spells.Buff)}
+		Character.RougeVisionRadious, false, make(map[int]*Spells.Buff), true}
 
 	game.player = &Character.Hero{&base, "Rouge", charBackGround, make([]*Spells.Spell, 0, 3), 
 		make(map[Point.Point]int), Character.RougeMemoryDuration}
@@ -138,35 +138,78 @@ func (game *Game) createHero() {
 // 	return true
 // }
 
-// //function will remove a monster from the monster list
-// func (game *Game) MonsterDefeted() {
-
-// }
-
 // //function will remove a trap from the trap list
 // func (game *Game) TrapDisarmed() {
 
 // }
 
+func (game *Game) removeMonster(place int) {
+	game.monsterList = append(game.monsterList[:place], game.monsterList[place +1:]...)
+}
+
+func (game *Game) playerDefetedMessage() {
+	fmt.Println("Player defeted")
+	time.Sleep(2000 * time.Millisecond)
+}
+
+// //function will remove a monster from the monster list
+func (game *Game) monsterDefetedMessage(name string, playerName string) {
+	fmt.Println("Player defets monster")
+	time.Sleep(2000 * time.Millisecond)
+}
+
+func (game *Game) isCharacterDefeted(character *Character.NPC, place int) {
+	if character.CurrentHealth < 0 {
+		switch true {
+		case place == -1:
+			game.playerDefeted = true
+			game.playerDefetedMessage()
+		case place > -1:
+			game.removeMonster(place)
+			game.monsterSlain++
+			game.restoreTile(character.Location.X, character.Location.Y)
+			game.monsterDefetedMessage(character.Name, game.player.Base.Name)
+		}
+	}
+}
+
+func (game *Game) avoidAttackMessage(attackerName string, defenderName string) {
+	fmt.Println("Defender dodges")
+	time.Sleep(2000 * time.Millisecond)
+}
+
+func (game *Game) takeDamageMessage(damage float32, attacker *Character.NPC, defender *Character.NPC) {
+	fmt.Printf("%s strikes %s for %f points of damage. %s has %f HP left\n", attacker.Name, defender.Name,
+						 damage,defender.Name, defender.CurrentHealth)
+	time.Sleep(4000 * time.Millisecond)
+}
+
 // //this function will find the moster in the list with which the player will engage in combat
 //ADDDDDDDD ERRRRRRRORRRRRRRRRRRRRRRRRRRR
-func (game *Game) findEnemy(requiredX int, requiredY int) *NPC{
-	if game.player.Base.Location.X == requiredX && game.player.Base.Location.Y == requiredY && {
-		return game.player.Base
+func (game *Game) findEnemy(requiredX int, requiredY int) (int, *Character.NPC) {
+	if game.player.Base.Location.X == requiredX && game.player.Base.Location.Y == requiredY {
+		return -1, game.player.Base
 	}
-	for _, monster := range game.monsterList {
-		if monster.Location.X == requiredX && monster.Location.Y = requiredY
-		return monster
+	for place, monster := range game.monsterList {
+		if monster.Location.X == requiredX && monster.Location.Y == requiredY {
+			return place, monster
+		}
 	}
- 	return NPC{}
+ 	return -2, &Character.NPC{}
 }
 
 //this function will handle the fight event
 func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
-	enemy := game.findEnemy(enemyX, enemyY)
+	place, enemy := game.findEnemy(enemyX, enemyY)
 	damage := character.DoDamage()
-	armor := enemy.Defence()
+	//include backstab bonus somewhere around here
+	if rand.Intn(100) < enemy.Evasion {
+		game.avoidAttackMessage(character.Name, enemy.Name)
+	} else {
 	enemy.TakeDamage(damage)
+	game.takeDamageMessage(damage, character, enemy)
+	}
+	game.isCharacterDefeted(enemy, place)
 }
 
 func (game *Game) characterMoveTo(character *Character.NPC, x int, y int) {
@@ -175,16 +218,20 @@ func (game *Game) characterMoveTo(character *Character.NPC, x int, y int) {
 }
 
 // //given a user input the function handles the desired action the player wants to performe
-func (game *Game) plyerActionEvent(x int, y int, *character Character.NPC) {
+func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
 	switch game.labyrinth.Labyrinth[x][y] {
 	case Labyrinth.Pass:
 		game.characterMoveTo(character, x, y)
 	case Labyrinth.StartPosition:
 		game.characterMoveTo(character, x, y)
 	case Labyrinth.Monster:
-		game.fight(character, x, y)
+		if character.IsHuman {
+			game.fight(character, x, y)
+		}
 	case Labyrinth.CharSymbol:
-		game.fight(character, x, y)
+		if !character.IsHuman {
+			game.fight(character, x, y)
+		}
 	case Labyrinth.Trap:
 		//disarm the trap or lose an arm
 	case Labyrinth.Treasure:
@@ -269,7 +316,7 @@ func (game *Game) createMonster(x int, y int) Character.NPC{
 	armor := game.createArmor()
 	//TRANSFER VALUES TO SEPARATE FILE
 	return Character.NPC{&Point.Point{x, y, nil}, Labyrinth.Monster, "Skeleton", &Point.Point{-1, 0, nil},
-	&weapon, &armor, 1,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spells.Buff)}
+	&weapon, &armor, 1,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spells.Buff), false}
 }
 
 // the function will create the traps in the maze

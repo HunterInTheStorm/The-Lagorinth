@@ -79,6 +79,7 @@ type NPC struct {
 	VisionRadious int
 	IsStunned bool
 	Buffs map[int]*Spells.Buff
+	IsHuman bool
 }
 
 //a npc will move one forward depemding on its orientation
@@ -155,10 +156,14 @@ func (npc *NPC) DoDamage() float32 {
 	return npc.DmgMultuplier * npc.Weapon.Damage()
 }
 
+func (npc *NPC) CombinedDefence() float32 {
+	return float32(npc.Defence + npc.Armor.Defence)
+}
+
 //the function substracs the funcyion's argument "damage" from the characters currentHealth
 func (npc *NPC) TakeDamage(damage float32) {
-	var damageTaken float32
-	if damage - float32(npc.Defence + npc.Armor.Defence) > 0 {
+	var damageTaken float32 = damage - npc.CombinedDefence()
+	if damage > 0 {
 		npc.CurrentHealth = npc.CurrentHealth - damageTaken
 	}
 }
