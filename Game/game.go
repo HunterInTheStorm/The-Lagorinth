@@ -70,7 +70,7 @@ func (game *Game) createPaladin(charName string, charBackGround string) {
 		Character.PaladinEvasion,Character.PaladinCritChance, Character.PaladinMaxHealth, 
 		Character.PaladinMaxHealth, Character.PaladinHealthRegen, Character.PaladinMaxMana,
 		Character.PaladinMaxMana, Character.PaladinManaRegen, Character.PaladinVisionRadious, 
-		false, make(map[int]*Spells.Buff), true}
+		false, make(map[int]*Spells.Buff), true, Character.PaladinTrapHandling}
 
 	game.player = &Character.Hero{&base, "Paladin", charBackGround, make([]*Spells.Spell, 0, 3), 
 		make(map[Point.Point]int), Character.PaladinMemoryDuration}
@@ -84,7 +84,7 @@ func (game *Game) createMage(charName string, charBackGround string) {
 		&Point.Point{1, 0, nil}, &weapon, &armor, Character.MageDmgMultuplier, Character.MageDefence, 
 		Character.MageEvasion, Character.MageCritChance, Character.MageMaxHealth, Character.MageMaxHealth,
 		Character.MageHealthRegen, Character.MageMaxMana, Character.MageMaxMana, Character.MageManaRegen, 
-		Character.MageVisionRadious, false, make(map[int]*Spells.Buff), true}
+		Character.MageVisionRadious, false, make(map[int]*Spells.Buff), true, Character.MageTrapHandling}
 
 	game.player = &Character.Hero{&base, "Mage", charBackGround, make([]*Spells.Spell, 0, 3), 
 		make(map[Point.Point]int), Character.MageMemoryDuration}
@@ -100,7 +100,7 @@ func (game *Game) createRouge(charName string, charBackGround string) {
 		&Point.Point{1, 0, nil}, &weapon, &armor, Character.RougeDmgMultuplier, Character.RougeDefence, 
 		Character.RougeEvasion, Character.RougeCritChance, Character.RougeMaxHealth, Character.RougeMaxHealth, 
 		Character.RougeHealthRegen, Character.RougeMaxMana, Character.RougeMaxMana, Character.RougeManaRegen, 
-		Character.RougeVisionRadious, false, make(map[int]*Spells.Buff), true}
+		Character.RougeVisionRadious, false, make(map[int]*Spells.Buff), true, Character.RougeTrapHandling}
 
 	game.player = &Character.Hero{&base, "Rouge", charBackGround, make([]*Spells.Spell, 0, 3), 
 		make(map[Point.Point]int), Character.RougeMemoryDuration}
@@ -133,15 +133,73 @@ func (game *Game) createHero() {
 
 // }
 
-// //function will determine if a character can move to a certain possition
-// func (game *Game) CanMoveTo() bool {
-// 	return true
-// }
+func (game *Game) isTrapTriggered(character *Character.NPC) (*Character.Trap, bool) {
+	if trap, ok := game.trapList[Point.Point{character.Location.X, character.Location.Y, nil}]; ok {
+    	return trap, true
+	}
+	return &Character.Trap{}, false
+}
 
-// //function will remove a trap from the trap list
-// func (game *Game) TrapDisarmed() {
+func (game *Game) removeTrap(trap *Character.Trap) {
+	game.restoreTile(trap.Location.X, trap.Location.Y)
+	delete(game.trapList, *trap.Location)
+}
 
-// }
+func (game *Game) calculateOddsVsTraps(difficulty int, trapHandlingSkill int) int {
+	return 100 - difficulty * 10 + trapHandlingSkill * 5
+}
+
+func (game *Game) attempDisarmTrap(trap *Character.Trap, character *Character.NPC) {
+	chance := game.calculateOddsVsTraps(trap.DisarmDifficulty, character.TrapHandling)
+	if rand.Intn(100) < chance {
+		fmt.Println("TRAP DISARMED!. HELL YEAH!!!!!!!!!!")
+		time.Sleep(2000 * time.Millisecond)
+		trap.IsDisarmed = true
+		trap.CanBeDisarmed = false
+		game.trapsDisarmed ++
+		game.removeTrap(trap)
+	} else {
+		fmt.Println("YOU ARE SUCH A DISAPPOINTMENT")
+		time.Sleep(2000 * time.Millisecond)
+		trap.CanBeDisarmed = false
+	}
+}
+
+func (game *Game) attempDetectTrap(trap *Character.Trap, character *Character.NPC) {
+	chance := game.calculateOddsVsTraps(trap.DetectDifficulty, character.TrapHandling)
+	if rand.Intn(100) < chance {
+		fmt.Println("TRAP DETECTED!!!!!!!")
+		time.Sleep(2000 * time.Millisecond)
+		trap.IsDetected = true
+		trap.CanBeDetected = false
+	} else {
+		fmt.Println("TRAP NOT DETECTED :(")
+		time.Sleep(2000 * time.Millisecond)
+		trap.CanBeDetected = false
+	}
+}
+
+func (game *Game) encounterTrap(character *Character.NPC, x int, y int) {
+	trap := game.trapList[Point.Point{x, y, nil}]
+	if trap.CanBeDetected && !trap.IsDetected {
+		game.attempDetectTrap(trap, character)
+		if !trap.IsDetected {
+			game.characterMoveTo(character, x, y)
+		} 
+	} else if trap.IsDetected && trap.CanBeDisarmed {
+		fmt.Println("Do you want to disarm the trap(y/n)")
+		answer := game.detectKeyPress()
+		if answer == "y"{
+			game.attempDisarmTrap(trap, character)
+		} else if answer == "n" {
+			game.characterMoveTo(character, x, y)
+		}
+	} else if !trap.IsDetected || !trap.IsDisarmed{
+		game.characterMoveTo(character, x, y)
+	} else {
+		game.characterMoveTo(character, x, y)
+	}
+}
 
 func (game *Game) removeMonster(place int) {
 	game.monsterList = append(game.monsterList[:place], game.monsterList[place +1:]...)
@@ -178,10 +236,16 @@ func (game *Game) avoidAttackMessage(attackerName string, defenderName string) {
 	time.Sleep(2000 * time.Millisecond)
 }
 
+func (game *Game) takeDamageFromTrapMessage(damage float32, attackerName string, defender *Character.NPC) {
+	fmt.Printf("%s strikes %s for %f points of damage.\n", attackerName, defender.Name,
+						 damage)
+	time.Sleep(2000 * time.Millisecond)
+}
+
 func (game *Game) takeDamageMessage(damage float32, attacker *Character.NPC, defender *Character.NPC) {
 	fmt.Printf("%s strikes %s for %f points of damage. %s has %f HP left\n", attacker.Name, defender.Name,
 						 damage,defender.Name, defender.CurrentHealth)
-	time.Sleep(4000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 }
 
 // //this function will find the moster in the list with which the player will engage in combat
@@ -233,7 +297,11 @@ func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
 			game.fight(character, x, y)
 		}
 	case Labyrinth.Trap:
-		//disarm the trap or lose an arm
+		if character.IsHuman {
+			game.encounterTrap(character, x, y)
+		} else {
+			game.characterMoveTo(character, x, y)
+		}
 	case Labyrinth.Treasure:
 		//get the loot
 	case Labyrinth.ExitPosition:
@@ -278,11 +346,6 @@ func (game *Game) playerAction(key string) {
 	}
 }
 
-// //function to restore the original state of the 2d maze array
-// func (game *Game) RestoreLabyrinth(x, y int) {
-
-// }
-
 // //function will create a new monster at random intervals of time
 // func (game *Game) SpawnMonster() {
 
@@ -316,17 +379,14 @@ func (game *Game) createMonster(x int, y int) Character.NPC{
 	armor := game.createArmor()
 	//TRANSFER VALUES TO SEPARATE FILE
 	return Character.NPC{&Point.Point{x, y, nil}, Labyrinth.Monster, "Skeleton", &Point.Point{-1, 0, nil},
-	&weapon, &armor, 1,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spells.Buff), false}
+	&weapon, &armor, 1,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spells.Buff), false, 1}
 }
 
 // the function will create the traps in the maze
 func (game *Game) createTrap(x int, y int) Character.Trap{
-	trapType := Character.TrapTypes[rand.Intn(len(Character.TrapTypes))]
-	detectDiff := rand.Intn(10) + 1
-	disarmDiff := rand.Intn(5) + 1
-	minDmg := rand.Intn(6)
-	maxDmg := rand.Intn(6) + minDmg
-	return Character.Trap{&Point.Point{x, y, nil},trapType,  detectDiff, disarmDiff, false, false, minDmg, maxDmg}
+	trap := Character.Trap{}
+	trap.Randomize(&Point.Point{x, y, nil})
+	return trap
 }
 
 func (game *Game) setGameFieldValues() {
@@ -400,7 +460,16 @@ func (game *Game) drawCharacters() {
 func (game *Game) drawLabyrinth() {
 	for i := 0; i < game.labyrinth.Width; i++ {
 		for j := 0; j < game.labyrinth.Height; j++ {
-			fmt.Print(game.labyrinth.Labyrinth[i][j])
+			if game.labyrinth.Labyrinth[i][j] == Labyrinth.Trap {
+				trap := game.trapList[Point.Point{i, j, nil}]
+				if trap.IsDetected {
+					fmt.Print(game.labyrinth.Labyrinth[i][j])
+				} else {
+					fmt.Print(Labyrinth.Pass)
+				}
+			} else {
+				fmt.Print(game.labyrinth.Labyrinth[i][j])
+			}
 		}
 		fmt.Println()
 	}
@@ -410,6 +479,73 @@ func (game *Game) detectKeyPress() string{
 	reader := bufio.NewReader(os.Stdin)
 	key, _ := reader.ReadString('\n')
 	return strings.Trim(key,"\r\n")
+}
+
+func (game *Game) triggerDamageTrap(trap *Character.Trap, character *Character.NPC) {
+	damage := trap.DamageTrap()
+	if rand.Intn(100) < character.Evasion {
+		game.avoidAttackMessage(character.Name, Character.TrapTypes[0])
+	} else {
+		character.TakeDamage(damage)
+		game.takeDamageFromTrapMessage(damage, Character.TrapTypes[0], character)
+	}
+	game.isCharacterDefeted(character, -1)
+}
+
+
+func (game *Game) findEmptyTile(centerX int, centerY int) Point.Point{
+	for e := 0; true; e++ {
+		for i := centerX - 1 - e; i <= centerX + 1 + e; i++ {
+			for j := centerY - 1 - e; j <= centerY + 1 + e; j++ {
+				if i > -1 && j > -1 && game.labyrinth.Labyrinth[i][j] == Labyrinth.Pass {
+					return Point.Point{i, j, nil}
+				}
+			}
+		}
+	}
+	return Point.Point{}
+}
+
+func (game *Game) spawnTrap(trap *Character.Trap) {
+	fmt.Println("SPAWNTRAP ACTIVATED")
+	time.Sleep(2000 * time.Millisecond)
+	location := trap.NewLocation(game.labyrinth.Width, game.labyrinth.Height)
+	if game.labyrinth.Labyrinth[location.X][location.Y] == Labyrinth.Pass {
+		newMonster := game.createMonster(location.X, location.Y)
+		game.monsterList = append(game.monsterList, &newMonster)
+	} else {
+		location = game.findEmptyTile(location.X, location.Y)			
+		newMonster := game.createMonster(location.X, location.Y)
+		game.monsterList = append(game.monsterList, &newMonster)
+	}
+	fmt.Printf("Monster Spawned at %v,%v", location.X, location.Y)
+	time.Sleep(2000 * time.Millisecond)
+}
+
+func (game *Game) triggerTrap(trap *Character.Trap, character *Character.NPC) {
+	switch trap.TrapType {
+	case Character.TrapTypes[0]:
+		game.triggerDamageTrap(trap, character)
+	case Character.TrapTypes[1]:
+		game.spawnTrap(trap)
+	case Character.TrapTypes[2]:
+
+	case Character.TrapTypes[3]:
+
+	case Character.TrapTypes[4]:
+	}
+}
+
+func (game *Game) checkTraps() {
+	if trap, ok := game.isTrapTriggered(game.player.Base) ; ok {
+		game.triggerTrap(trap, game.player.Base)
+	}
+}
+
+func (game *Game) npcsTurn() {
+	//spells
+	game.checkTraps()
+	//monsters
 }
 
 //main loop cycle for the game
@@ -424,6 +560,7 @@ func (game *Game) Run() {
 		game.drawLabyrinth()
 		key := game.detectKeyPress()
 		game.playerAction(key)
+		game.npcsTurn()
 		if game.playerDefeted || game.gameCompleted {
 			break
 		}

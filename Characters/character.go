@@ -11,7 +11,7 @@ import "math/rand"
 var PaladinClassName string = "Paladin"
 //PALADIN
 //NPC
-var PaladinDmgMultuplier float32 = 1.2
+var PaladinDmgMultuplier float32 = 6.5
 var PaladinDefence int = 6 
 var PaladinEvasion int = 3
 var PaladinCritChance int = 15
@@ -20,6 +20,7 @@ var PaladinHealthRegen float32 = 3.6
 var PaladinMaxMana float32 = 75.0
 var PaladinManaRegen float32= 1.9
 var PaladinVisionRadious int = 4
+var PaladinTrapHandling int = 1
 
 //Character
 	// SpellLList []Spells.Spell
@@ -38,7 +39,7 @@ var MageHealthRegen float32 = 3.6
 var MageMaxMana float32 = 75.0
 var MageManaRegen float32 = 1.9
 var MageVisionRadious int = 4
-
+var MageTrapHandling int = 3
 //Character
 	// SpellLList []Spells.Spell
 	// Memory map[Point.Point]int
@@ -56,6 +57,7 @@ var RougeHealthRegen float32 = 3.6
 var RougeMaxMana float32 = 75.0
 var RougeManaRegen float32 = 1.9
 var RougeVisionRadious int = 5
+var RougeTrapHandling int = 6
 
 //Character
 	// SpellLList []Spells.Spell
@@ -80,6 +82,7 @@ type NPC struct {
 	IsStunned bool
 	Buffs map[int]*Spells.Buff
 	IsHuman bool
+	TrapHandling int
 }
 
 //a npc will move one forward depemding on its orientation
@@ -241,28 +244,41 @@ type Trap struct {
 	DetectDifficulty int
 	DisarmDifficulty int
 	IsDisarmed bool
-	DisarmAtempted bool
+	IsDetected bool
+	CanBeDisarmed bool
+	CanBeDetected bool
 	MinDmg int
 	MaxDmg int
 }
 
-// func (trap *Trap) Randomize() {
-
-// }
+func (trap *Trap) Randomize(loc *Point.Point) {
+	trap.Location = loc
+	trap.TrapType = TrapTypes[rand.Intn(len(TrapTypes))]
+	trap.DetectDifficulty = rand.Intn(10) + 1
+	trap.DisarmDifficulty = rand.Intn(10) + 1
+	trap.IsDisarmed = false
+	trap.IsDetected = false
+	trap.CanBeDisarmed = true
+	trap.CanBeDetected = true
+	trap.MinDmg = rand.Intn(6)
+	trap.MaxDmg = rand.Intn(6) + trap.MinDmg
+}
 
 // //the function returns the damage(integer) the character will do to an enemy
 // func (trap Trap) DoDamage() int {
 // 	return 99
 // }
 
+func (trap *Trap) DamageTrap() float32 {
+	damageRange := trap.MaxDmg - trap.MinDmg
+ 	return float32(rand.Intn(damageRange) + trap.MinDmg)
+}
+
 // //the function will return a point for where an enemy will spawn
-// func (trap Trap) SpawnMonsters() Point {
-// 	return Point{0,0}
-// }
+func (trap Trap) NewLocation(labWidth int, labHeight int) Point.Point {
+ 	return Point.Point{rand.Intn(labWidth), rand.Intn(labHeight), nil}
+}
 
-// func (trap Trap) TeleportPlayer(hero *Hero ) Point, Point {
-
-// }
 
 // func (trap Trap) WhipeMemory(hero *Hero) Point {
 
@@ -270,31 +286,4 @@ type Trap struct {
 
 // func (trap Trap) WhipeMemoryAndTeleport(hero *Hero) Point, Point {
 
-// }
-
-// type Mimic struct {
-// 	currentHealth, maxHealth int
-// 	x,y int
-// 	orientation *Point
-// 	symbol string
-// }
-
-// //the function returns the damage(integer) the character will do to an enemy
-// func (mimic Mimic) DoDamage() int {
-// 	return 0
-// }
-
-// //the function substracs the funcyion's argument "damage" from the characters currentHealth
-// func (mimic Mimic) TakeDamage(damage int) {
-
-// }
-
-// //function will determine whether the character is hit or not
-// func (mimic Mimic) WillBeHit() bool {
-// 	return false
-// }
-
-// //function determies whether the character will hit or not
-// func (mimic Mimic) WillHit() bool {
-// 	return true
 // }
