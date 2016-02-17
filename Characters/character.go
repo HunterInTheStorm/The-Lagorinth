@@ -280,10 +280,7 @@ func (trap Trap) NewLocation(labWidth int, labHeight int) Point.Point {
 }
 
 
-// func (trap Trap) WhipeMemory(hero *Hero) Point {
-
-// }
-
-// func (trap Trap) WhipeMemoryAndTeleport(hero *Hero) Point, Point {
-
-// }
+func (trap Trap) WhipeMemory(hero *Hero) {
+	newMemory := make(map[Point.Point]int)
+	hero.Memory = newMemory
+}

@@ -14,9 +14,6 @@ import "os/exec"
 import "bufio"
 import "strings"
 
-//This structure discribes the rules of the game concerning character creation,
-//player and npc movement, contain various array to trac monsters, traps and mimics,
-//win/lose  conditions adn statistics effecting the final score
 type Game struct {
 	playerDefeted bool
 	gameCompleted bool
@@ -506,6 +503,31 @@ func (game *Game) findEmptyTile(centerX int, centerY int) Point.Point{
 	return Point.Point{}
 }
 
+func (game *Game) teleportMemoryWhipeTrap(trap *Character.Trap, hero *Character.Hero) {
+	game.memoryWhipeTrap(trap, hero)
+	game.teleportTrap(trap, hero.Base)
+}
+
+func (game *Game) memoryWhipeTrap(trap *Character.Trap, hero *Character.Hero) {
+	fmt.Println("MEMORY TRAP")
+	time.Sleep(2000 * time.Millisecond)
+	trap.WhipeMemory(hero)
+}
+
+func (game *Game) teleportTrap(trap *Character.Trap, character *Character.NPC) {
+	fmt.Println("TELEPORT TRAP")
+	time.Sleep(2000 * time.Millisecond)
+	location := trap.NewLocation(game.labyrinth.Width, game.labyrinth.Height)
+	if game.labyrinth.Labyrinth[location.X][location.Y] == Labyrinth.Pass {
+		character.Location.X = location.X
+		character.Location.Y = location.Y
+	} else {
+		location = game.findEmptyTile(location.X, location.Y)
+		character.Location.X = location.X
+		character.Location.Y = location.Y
+	}
+}
+
 func (game *Game) spawnTrap(trap *Character.Trap) {
 	fmt.Println("SPAWNTRAP ACTIVATED")
 	time.Sleep(2000 * time.Millisecond)
@@ -522,23 +544,24 @@ func (game *Game) spawnTrap(trap *Character.Trap) {
 	time.Sleep(2000 * time.Millisecond)
 }
 
-func (game *Game) triggerTrap(trap *Character.Trap, character *Character.NPC) {
+func (game *Game) triggerTrap(trap *Character.Trap, character *Character.Hero) {
 	switch trap.TrapType {
 	case Character.TrapTypes[0]:
-		game.triggerDamageTrap(trap, character)
+		game.triggerDamageTrap(trap, character.Base)
 	case Character.TrapTypes[1]:
 		game.spawnTrap(trap)
 	case Character.TrapTypes[2]:
-
+		game.teleportTrap(trap, character.Base)
 	case Character.TrapTypes[3]:
-
+		game.memoryWhipeTrap(trap, character)
 	case Character.TrapTypes[4]:
+		game.teleportMemoryWhipeTrap(trap, character)
 	}
 }
 
 func (game *Game) checkTraps() {
 	if trap, ok := game.isTrapTriggered(game.player.Base) ; ok {
-		game.triggerTrap(trap, game.player.Base)
+		game.triggerTrap(trap, game.player)
 	}
 }
 
