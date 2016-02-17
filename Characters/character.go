@@ -3,6 +3,7 @@ package Character
 import "github.com/golang/The-Lagorinth/Items"
 import "github.com/golang/The-Lagorinth/Spells"
 import "github.com/golang/The-Lagorinth/Point"
+import "github.com/golang/The-Lagorinth/Labyrinth"
 import "math/rand"
 
 // import "github.com/golang/The-Lagorinth/Items"
@@ -25,7 +26,7 @@ var PaladinTrapHandling int = 1
 //Character
 	// SpellLList []Spells.Spell
 	// Memory map[Point.Point]int
-var PaladinMemoryDuration int = 10
+var PaladinMemoryDuration int = 17
 
 var MageClassName string = "Mage"
 //MAGE
@@ -220,21 +221,76 @@ type Hero struct {
 
 // }
 
-// func (hero *Hero) UseInstantSpell() {
-
-// }
+func (hero *Hero) UpdateMemory() {
+	for point, _ := range hero.Memory {
+		if hero.Memory[point] > -1 {
+			hero.Memory[point]--
+		} else {
+			delete(hero.Memory, point)
+		}
+	}
+}
 
 // //given an array of Points the character memory of the labyrinth will be updated with new tiles
 // //that he remebers(tiles that will be displyed)
-// func(hero *Hero) MemorizeLabyrinth(points []Point) {
+func (hero *Hero) MemorizeLabyrinth(labyrinth *Labyrinth.Labyrinth, center *Point.Point) {
+	var minX int = center.X - hero.Base.VisionRadious
+	var maxX int = center.X + hero.Base.VisionRadious
+	var minY int = center.Y - hero.Base.VisionRadious
+	var maxY int = center.Y + hero.Base.VisionRadious
+	var y int
+	for currentY := minY; currentY <= maxY; currentY++ {
+		for xAscend := center.X; xAscend <= maxX; xAscend++ {
+			y = lineEquationRegardsToX(xAscend, center.X, center.Y, maxX, currentY)
+			if labyrinth.IsInBondaries(xAscend, y) && labyrinth.Labyrinth[xAscend][y] != Labyrinth.Wall {
+				hero.Memory[Point.Point{xAscend, y, nil}] = hero.MemoryDuration
+			} else {
+				hero.Memory[Point.Point{xAscend, y, nil}] = hero.MemoryDuration
+				break 
+			}
+		}
+		for xDescend := center.X; xDescend >= minX; xDescend-- {
+			y = lineEquationRegardsToX(xDescend, center.X, center.Y, minX, currentY)
+			if labyrinth.IsInBondaries(xDescend, y) && labyrinth.Labyrinth[xDescend][y] != Labyrinth.Wall {
+				hero.Memory[Point.Point{xDescend, y, nil}] = hero.MemoryDuration
+			} else {
+				hero.Memory[Point.Point{xDescend, y, nil}] = hero.MemoryDuration
+				break 
+			}
+		}
+	}
+	var x int
+	for currentX := minX; currentX <= maxX; currentX++ {
+		for yDescend := center.Y; yDescend >= minY; yDescend-- {
+			x = lineEquationRegardsToY(yDescend, center.X, center.Y, currentX, minY)
+			if labyrinth.IsInBondaries(x, yDescend) && labyrinth.Labyrinth[x][yDescend] != Labyrinth.Wall {
+				hero.Memory[Point.Point{x, yDescend, nil}] = hero.MemoryDuration
+			} else {
+				hero.Memory[Point.Point{x, yDescend, nil}] = hero.MemoryDuration
+				break 
+			}
+		}
+		for yAscend := center.Y; yAscend <= maxY; yAscend++ {
+			x = lineEquationRegardsToY(yAscend, center.X, center.Y, currentX, maxY)
+			if labyrinth.IsInBondaries(x, yAscend) && labyrinth.Labyrinth[x][yAscend] != Labyrinth.Wall {
+				hero.Memory[Point.Point{x, yAscend, nil}] = hero.MemoryDuration
+			} else {
+				hero.Memory[Point.Point{x, yAscend, nil}] = hero.MemoryDuration
+				break 
+			}
+		}
+	}
+}
 
-// }
+func lineEquationRegardsToX(x int, x0 int, y0 int, x1 int, y1 int) int{
+	 y := float32((x - x0)*(y1 - y0)/(x1 - x0) + y0)
+	 return int(y + 0.5)
+}
 
-// //values in the memory array will be updated by lowering the duration integer by one 
-// func(hero *Hero) UpdateMemory(){
-
-// }
-
+func lineEquationRegardsToY(y int, x0 int, y0 int, x1 int, y1 int) int{
+	 x := float32((y - y0)*(x1 - x0)/(y1 - y0) + x0)
+	 return int(x + 0.5)
+}
 
 var	TrapTypes []string = []string{"DamageTrap","SpawnTrap","TeleportTrap","MemoryWhipeTrap","TabulaRasaTrap"}
 
@@ -260,7 +316,7 @@ func (trap *Trap) Randomize(loc *Point.Point) {
 	trap.IsDetected = false
 	trap.CanBeDisarmed = true
 	trap.CanBeDetected = true
-	trap.MinDmg = rand.Intn(6)
+	trap.MinDmg = rand.Intn(6) + 1
 	trap.MaxDmg = rand.Intn(6) + trap.MinDmg
 }
 

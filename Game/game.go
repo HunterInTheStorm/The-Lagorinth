@@ -28,6 +28,8 @@ type Game struct {
 	trapList map[Point.Point]*Character.Trap
 	labyrinth *Labyrinth.Labyrinth
 	player *Character.Hero
+	camera *Point.Point
+	cameraRadius int
 }
 
 
@@ -116,6 +118,7 @@ func (game *Game) createHero() {
 	case "Mage":
 		game.createMage(charName, charBackGround)
 	}
+	game.player.MemorizeLabyrinth(game.labyrinth, game.player.Base.Location)
 }
 
 // // the function will calculate the final score the player has acheived
@@ -302,8 +305,17 @@ func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
 	case Labyrinth.Treasure:
 		//get the loot
 	case Labyrinth.ExitPosition:
-		//exit
+		if character.IsHuman {
+			game.exitFound()
+			game.characterMoveTo(character, x, y)
+		} else {
+			game.characterMoveTo(character, x, y)
+		}
 	}
+}
+
+func (game *Game) exitFound() {
+	game.gameCompleted = true
 }
 
 func (game *Game) restoreTile(x int, y int) {
@@ -313,17 +325,22 @@ func (game *Game) restoreTile(x int, y int) {
 }
 
 //function takes user input and send it to PlayerActionEvent
-func (game *Game) playerAction(key string) {
+func (game *Game) playerAction() {
+	key := game.detectKeyPress()
 	game.restoreTile(game.player.Base.Location.X, game.player.Base.Location.Y)
 	switch key {
 	case "w":
 		game.plyerActionEvent(game.player.Base.Location.X - 1, game.player.Base.Location.Y, game.player.Base)
+		game.cameraReset()
 	case "a":
 		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y - 1, game.player.Base)
+		game.cameraReset()
 	case "s":
 		game.plyerActionEvent(game.player.Base.Location.X + 1, game.player.Base.Location.Y, game.player.Base)
+		game.cameraReset()
 	case "d":
 		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y + 1, game.player.Base)
+		game.cameraReset()
 	case "e":
 		game.playerDefeted = true
 	case "1":
@@ -333,16 +350,49 @@ func (game *Game) playerAction(key string) {
 	case "3":
 		fmt.Println("SO FAR SO GOOD, SCELL CAST 3")
 	case "4":
-		fmt.Println("SO FAR SO GOOD, CAMERA MOVEMENT LEFT")
+		game.cameraMoveLeft()
+		game.draw()
+		game.playerAction()
 	case "5":
-		fmt.Println("SO FAR SO GOOD, CAMERA MOVEMENT DOWN")
+		game.cameraMoveDown()
+		game.draw()
+		game.playerAction()
 	case "6":
-		fmt.Println("SO FAR SO GOOD, CAMERA MOVEMETN RIGHT")
+		game.cameraMoveRight()
+		game.draw()
+		game.playerAction()
 	case "8":
-		fmt.Println("SO FAR SO GOOD,CAMERA MOVEMENT UP")
+		game.cameraMoveUp()
+		game.draw()
+		game.playerAction()
+	case "home":
+		game.cameraReset()
+		game.draw()
+		game.playerAction()
 	}
+	game.player.MemorizeLabyrinth(game.labyrinth, game.player.Base.Location)
 }
 
+func (game *Game) cameraMoveLeft() {
+	game.camera.Y--
+}
+
+func (game *Game) cameraMoveDown() {
+	game.camera.X++
+}
+
+func (game *Game) cameraMoveRight() {
+	game.camera.Y++
+}
+
+func (game *Game) cameraMoveUp() {
+	game.camera.X--
+}
+
+func (game *Game) cameraReset() {
+	game.camera.X = game.player.Base.Location.X
+	game.camera.Y = game.player.Base.Location.Y
+}
 // //function will create a new monster at random intervals of time
 // func (game *Game) SpawnMonster() {
 
@@ -394,6 +444,7 @@ func (game *Game) setGameFieldValues() {
 	game.monsterSlain = 0
 	game.chestsLooted = 0
 	game.trapsDisarmed = 0
+	game.cameraRadius = 8
 }
 
 func (game *Game) createLabyrinth() {
@@ -418,6 +469,7 @@ func (game *Game) createMonsterAndTrapsLists() {
 				switch tile {
 				case Labyrinth.StartPosition:
 					game.start = &Point.Point{i, j, nil}
+					game.camera = &Point.Point{i, j, nil}
 				case Labyrinth.ExitPosition:
 					game.end = &Point.Point{i, j, nil}
 				case Labyrinth.Trap:
@@ -455,21 +507,39 @@ func (game *Game) drawCharacters() {
 
 //function to draw the labyrinth
 func (game *Game) drawLabyrinth() {
-	for i := 0; i < game.labyrinth.Width; i++ {
-		for j := 0; j < game.labyrinth.Height; j++ {
-			if game.labyrinth.Labyrinth[i][j] == Labyrinth.Trap {
-				trap := game.trapList[Point.Point{i, j, nil}]
-				if trap.IsDetected {
-					fmt.Print(game.labyrinth.Labyrinth[i][j])
+	var maxX int = game.camera.X + game.cameraRadius
+	var minX int = game.camera.X - game.cameraRadius
+	var maxY int = game.camera.Y + game.cameraRadius
+	var minY int = game.camera.Y - game.cameraRadius
+	for i := minX; i <= maxX; i++ {
+		for j := minY; j <= maxY; j++ {
+			if game.labyrinth.IsInBondaries(i, j) {
+				if point, ok := game.player.Memory[Point.Point{i, j, nil}]; ok && point > -1 {
+					if game.labyrinth.Labyrinth[i][j] == Labyrinth.Trap {
+						trap := game.trapList[Point.Point{i, j, nil}]
+						if trap.IsDetected {
+							fmt.Print(game.labyrinth.Labyrinth[i][j])
+						} else {
+							fmt.Print(Labyrinth.Pass)
+						}
+					} else {
+						fmt.Print(game.labyrinth.Labyrinth[i][j])
+					}
 				} else {
-					fmt.Print(Labyrinth.Pass)
+					fmt.Print("+")
 				}
 			} else {
-				fmt.Print(game.labyrinth.Labyrinth[i][j])
+				fmt.Print("-")
 			}
 		}
 		fmt.Println()
 	}
+}
+
+func (game *Game) draw() {
+	game.clearScreen()
+	game.drawCharacters()
+	game.drawLabyrinth()
 }
 
 func (game *Game) detectKeyPress() string{
@@ -503,18 +573,18 @@ func (game *Game) findEmptyTile(centerX int, centerY int) Point.Point{
 	return Point.Point{}
 }
 
-func (game *Game) teleportMemoryWhipeTrap(trap *Character.Trap, hero *Character.Hero) {
-	game.memoryWhipeTrap(trap, hero)
-	game.teleportTrap(trap, hero.Base)
+func (game *Game) triggerTabulaRasaTrap(trap *Character.Trap, hero *Character.Hero) {
+	game.triggerMemoryWhipeTrap(trap, hero)
+	game.triggerTeleportTrap(trap, hero.Base)
 }
 
-func (game *Game) memoryWhipeTrap(trap *Character.Trap, hero *Character.Hero) {
+func (game *Game) triggerMemoryWhipeTrap(trap *Character.Trap, hero *Character.Hero) {
 	fmt.Println("MEMORY TRAP")
 	time.Sleep(2000 * time.Millisecond)
 	trap.WhipeMemory(hero)
 }
 
-func (game *Game) teleportTrap(trap *Character.Trap, character *Character.NPC) {
+func (game *Game) triggerTeleportTrap(trap *Character.Trap, character *Character.NPC) {
 	fmt.Println("TELEPORT TRAP")
 	time.Sleep(2000 * time.Millisecond)
 	location := trap.NewLocation(game.labyrinth.Width, game.labyrinth.Height)
@@ -526,9 +596,10 @@ func (game *Game) teleportTrap(trap *Character.Trap, character *Character.NPC) {
 		character.Location.X = location.X
 		character.Location.Y = location.Y
 	}
+	game.cameraReset()
 }
 
-func (game *Game) spawnTrap(trap *Character.Trap) {
+func (game *Game) triggerSpawnTrap(trap *Character.Trap) {
 	fmt.Println("SPAWNTRAP ACTIVATED")
 	time.Sleep(2000 * time.Millisecond)
 	location := trap.NewLocation(game.labyrinth.Width, game.labyrinth.Height)
@@ -549,13 +620,19 @@ func (game *Game) triggerTrap(trap *Character.Trap, character *Character.Hero) {
 	case Character.TrapTypes[0]:
 		game.triggerDamageTrap(trap, character.Base)
 	case Character.TrapTypes[1]:
-		game.spawnTrap(trap)
+		game.triggerSpawnTrap(trap)
 	case Character.TrapTypes[2]:
-		game.teleportTrap(trap, character.Base)
+		game.triggerTeleportTrap(trap, character.Base)
+		game.player.MemorizeLabyrinth(game.labyrinth, game.player.Base.Location)
+		game.draw()
 	case Character.TrapTypes[3]:
-		game.memoryWhipeTrap(trap, character)
+		game.triggerMemoryWhipeTrap(trap, character)
+		game.player.MemorizeLabyrinth(game.labyrinth, game.player.Base.Location)
+		game.draw()
 	case Character.TrapTypes[4]:
-		game.teleportMemoryWhipeTrap(trap, character)
+		game.triggerTabulaRasaTrap(trap, character)
+		game.player.MemorizeLabyrinth(game.labyrinth, game.player.Base.Location)
+		game.draw()
 	}
 }
 
@@ -571,19 +648,22 @@ func (game *Game) npcsTurn() {
 	//monsters
 }
 
+func (game *Game) clearScreen() {
+	c := exec.Command("cmd", "/c", "cls")
+	c.Stdout = os.Stdout
+	c.Run()
+}
+
 //main loop cycle for the game
 func (game *Game) Run() {
 	game.initialize()
 
 	for  {
-		c := exec.Command("cmd", "/c", "cls")
-		c.Stdout = os.Stdout
-		c.Run()
-		game.drawCharacters()
-		game.drawLabyrinth()
-		key := game.detectKeyPress()
-		game.playerAction(key)
+		game.player.UpdateMemory()
+		game.draw()
+		game.playerAction()
 		game.npcsTurn()
+		game.turns++
 		if game.playerDefeted || game.gameCompleted {
 			break
 		}

@@ -152,6 +152,9 @@ func(lab *Labyrinth) createTreasuresAndTraps() {
 	}
 }
 
+func (lab *Labyrinth) IsInBondaries(x int, y int) bool {
+	return x > -1 && x < lab.Width && y > -1 && y < lab.Height
+}
 
 //Determines if a given point is a crossroad, a point that has 1 or 0 neighbours that are "wall" cells
 func(lab *Labyrinth) isCrossRoad(x int, y int) bool {
