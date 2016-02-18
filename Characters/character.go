@@ -6,67 +6,174 @@ import "github.com/golang/The-Lagorinth/Point"
 import "github.com/golang/The-Lagorinth/Labyrinth"
 import "math/rand"
 
-// import "github.com/golang/The-Lagorinth/Items"
-// import "github.com/golang/The-Lagorinth/Spells"
-
 var PaladinClassName string = "Paladin"
-//PALADIN
-//NPC
-var PaladinDmgMultuplier float32 = 6.5
-var PaladinDefence int = 6 
-var PaladinEvasion int = 3
-var PaladinCritChance int = 15
-var PaladinMaxHealth float32 = 200.0
-var PaladinHealthRegen float32 = 3.6
-var PaladinMaxMana float32 = 75.0
-var PaladinManaRegen float32= 1.9
-var PaladinVisionRadious int = 4
-var PaladinTrapHandling int = 1
-
-//Character
-	// SpellLList []Spells.Spell
-	// Memory map[Point.Point]int
-var PaladinMemoryDuration int = 17
-
-var MageClassName string = "Mage"
-//MAGE
-//NPC
-var MageDmgMultuplier float32= 1.2
-var MageDefence int = 6 
-var MageEvasion int = 3
-var MageCritChance int = 15
-var MageMaxHealth float32 = 200.0
-var MageHealthRegen float32 = 3.6
-var MageMaxMana float32 = 75.0
-var MageManaRegen float32 = 1.9
-var MageVisionRadious int = 4
-var MageTrapHandling int = 3
-//Character
-	// SpellLList []Spells.Spell
-	// Memory map[Point.Point]int
-var MageMemoryDuration int = 12
-
 var RougeClassName string = "Rouge"
-//ROUGE
-//NPC
-var RougeDmgMultuplier float32 = 1.2
-var RougeDefence int = 6 
-var RougeEvasion int = 3
-var RougeCritChance int = 15
-var RougeMaxHealth float32 = 200.0
-var RougeHealthRegen float32 = 3.6
-var RougeMaxMana float32 = 75.0
-var RougeManaRegen float32 = 1.9
-var RougeVisionRadious int = 5
-var RougeTrapHandling int = 6
+var MageClassName string = "Mage"
 
-//Character
+var BackGroundNameGiant string = "giant"
+var BackGroundNameToreador string =	"toreador"
+var BackGroundNameCartographer string = "cartographer"
+var BackGroundNameLibrarian string = "librarian"
+
+// //this function will create one of the 3 classes for the player
+func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
+	//NPC
+	var dmgMultuplier float32 = 6.5
+	var defence int = 6 
+	var evasion int = 3
+	var critChance int = 15
+	var maxHealth float32 = 200.0
+	var healthRegen float32 = 3.6
+	var maxMana float32 = 75.0
+	var manaRegen float32= 1.9
+	var visionRadious int = 4
+	var trapHandling int = 1
+
+	//Character
 	// SpellLList []Spells.Spell
-	// Memory map[Point.Point]int
-var RougeMemoryDuration int = 10
+	memory := make(map[Point.Point]int)
+	var memoryDuration int = 17
+
+	base := NPC{&Point.Point{x, y, nil}, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
+		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
+		maxMana, manaRegen, visionRadious, false, make(map[int]*Spells.Buff), true, trapHandling}
+	
+	hero := Hero{&base, PaladinClassName, charBackGround, make([]*Spells.Spell, 0, 3), 
+		memory, memoryDuration}
+	return &hero
+}
+
+// //this function will create one of the 3 classes for the player
+func CreateMage(charName string, charBackGround string, x int, y int) *Hero {
+	//NPC
+	var dmgMultuplier float32= 1.2
+	var defence int = 6 
+	var evasion int = 3
+	var critChance int = 15
+	var maxHealth float32 = 200.0
+	var healthRegen float32 = 3.6
+	var maxMana float32 = 75.0
+	var manaRegen float32 = 1.9
+	var visionRadious int = 4
+	var trapHandling int = 3
+	//Character
+	// SpellLList []Spells.Spell
+	memory := make(map[Point.Point]int)
+	var memoryDuration int = 12
+
+	base := NPC{&Point.Point{x, y, nil}, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
+		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
+		maxMana, manaRegen, visionRadious, false, make(map[int]*Spells.Buff), true, trapHandling}
+	
+	hero := Hero{&base, MageClassName, charBackGround, make([]*Spells.Spell, 0, 3), 
+		memory, memoryDuration}
+	
+	return &hero
+}
+
+// //this function will create one of the 3 classes for the player
+func CreateRouge(charName string, charBackGround string, x int, y int) *Hero {
+	//ROUGE
+	//NPC
+	var dmgMultuplier float32 = 1.2
+	var defence int = 6 
+	var evasion int = 3
+	var critChance int = 15
+	var maxHealth float32 = 200.0
+	var healthRegen float32 = 3.6
+	var maxMana float32 = 75.0
+	var manaRegen float32 = 1.9
+	var visionRadious int = 5
+	var trapHandling int = 6
+
+	//Character
+	// SpellLList []Spells.Spell
+	memory := make(map[Point.Point]int)
+	var memoryDuration int = 10
 
 
+	base := NPC{&Point.Point{x, y, nil}, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
+		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
+		maxMana, manaRegen, visionRadious, false, make(map[int]*Spells.Buff), true, trapHandling}
+	
+	hero := Hero{&base, RougeClassName, charBackGround, make([]*Spells.Spell, 0, 3), 
+		memory, memoryDuration}
 
+	return &hero
+}
+
+
+func CreateBgGiant() *BackGround{
+	var memoryDuration int = 0
+	var visionRadius int = 0
+	var mana float32 = 0.0
+	var manaRegen float32 = 0.0
+	var health float32 = 50.0
+	var healthRegen float32 = 1.3
+	var armor int = 0
+	var evasion int = 0
+	var critChance int = 0
+	var dmgMultuplier float32 = 0.7
+
+	background := BackGround{BackGroundNameGiant, memoryDuration, visionRadius, mana,
+		manaRegen, health, healthRegen, armor, evasion, critChance, dmgMultuplier}
+
+	return &background
+}
+
+func CreateBgToreador() *BackGround {
+	var memoryDuration int = 0
+	var visionRadius int = 1
+	var mana float32 = 10.0
+	var manaRegen float32 = 0.3 
+	var health float32 = 10.0
+	var healthRegen float32 = 0.3
+	var armor int = 0
+	var evasion int = 5
+	var critChance int = 5
+	var dmgMultuplier float32 = 0.3
+
+	background := BackGround{BackGroundNameToreador, memoryDuration, visionRadius, mana,
+		manaRegen, health, healthRegen, armor, evasion, critChance, dmgMultuplier}
+
+	return &background
+}
+
+func CreateBgCartographer() *BackGround {
+	var memoryDuration int = 20
+	var visionRadius int = 3
+	var mana float32 = 30.0
+	var manaRegen float32 = 0.8
+	var health float32 = 30.0
+	var healthRegen float32 = 0.8
+	var armor int = 0
+	var evasion int = 0
+	var critChance int = 0
+	var dmgMultuplier float32 = 0
+
+	background := BackGround{BackGroundNameCartographer, memoryDuration, visionRadius, mana,
+		manaRegen, health, healthRegen, armor, evasion, critChance, dmgMultuplier}
+
+	return &background
+}
+
+func CreateBgLibrarian() *BackGround {
+	var memoryDuration int = 12
+	var visionRadius int = 0
+	var mana float32 = 60.0
+	var manaRegen float32 = 3.5
+	var health float32 = 0
+	var healthRegen float32 = 0
+	var armor int = 0
+	var evasion int = 0
+	var critChance int = 0
+	var dmgMultuplier float32 = 0.2
+
+	background := BackGround{BackGroundNameLibrarian, memoryDuration, visionRadius, mana,
+		manaRegen, health, healthRegen, armor, evasion, critChance, dmgMultuplier}
+
+	return &background
+}
 
 type NPC struct {
 	Location *Point.Point
@@ -163,7 +270,9 @@ func (npc *NPC) EquipWeapon(newWeapon *Items.Weapon) {
 
 //remove all of the values of a weapon's properties from the character's
 func (npc *NPC) UnequipWeapon() {
-	npc.Weapon = nil
+	if npc.Weapon != nil {
+		npc.Weapon = nil
+	}
 }
 
 //add all of the values of a armor's properties to the character's
@@ -201,7 +310,7 @@ func (npc *NPC) CombinedDefence() float32 {
 //the function substracs the funcyion's argument "damage" from the characters currentHealth
 func (npc *NPC) TakeDamage(damage float32) {
 	var damageTaken float32 = damage - npc.CombinedDefence()
-	if damage > 0 {
+	if damageTaken > 0 {
 		npc.CurrentHealth = npc.CurrentHealth - damageTaken
 	}
 }
@@ -220,6 +329,11 @@ func (npc *NPC) RegenMana() {
 	if npc.CurrentMana > npc.MaxMana {
 		npc.CurrentMana = npc.MaxMana
 	}
+}
+
+func (npc *NPC) Regenerate() {
+	npc.RegenMana()
+	npc.RegenHealth()
 }
 
 type Hero struct {
@@ -241,6 +355,22 @@ func (hero *Hero) SwapWeapon(weapon *Items.Weapon) {
 func (hero *Hero) SwapArmor(armor *Items.Armor) {
 	hero.Base.UnequipArmor()
 	hero.Base.EquipArmor(armor)
+}
+
+func (hero *Hero) ApplyBackground(background *BackGround) {
+	hero.BackGround = background.Name
+	hero.MemoryDuration += background.BonusMemoryDuration
+	hero.Base.VisionRadious += background.BonusVisionRadius
+	hero.Base.MaxMana += background.BonusMana
+	hero.Base.CurrentMana += background.BonusMana
+	hero.Base.ManaRegen += background.BonusManaRegen
+	hero.Base.MaxHealth += background.BonusHealth
+	hero.Base.CurrentHealth += background.BonusHealth
+	hero.Base.HealthRegen += background.BonusHealthRegen
+	hero.Base.Defence += background.BonusArmor
+	hero.Base.Evasion += background.BonusEvasion
+	hero.Base.CritChance += background.BonusCritChance
+	hero.Base.DmgMultuplier += background.BonusDmgMultuplier
 }
 
 // //a spell from the list of targetble spells will be envoked
@@ -352,8 +482,8 @@ func (trap *Trap) Randomize(loc *Point.Point) {
 	trap.IsDetected = false
 	trap.CanBeDisarmed = true
 	trap.CanBeDetected = true
-	trap.MinDmg = rand.Intn(6) + 1
-	trap.MaxDmg = rand.Intn(6) + trap.MinDmg
+	trap.MinDmg = rand.Intn(20) + 10
+	trap.MaxDmg = rand.Intn(15) + trap.MinDmg
 }
 
 func (trap *Trap) DamageTrap() float32 {
@@ -370,4 +500,18 @@ func (trap Trap) NewLocation(labWidth int, labHeight int) Point.Point {
 func (trap Trap) WhipeMemory(hero *Hero) {
 	newMemory := make(map[Point.Point]int)
 	hero.Memory = newMemory
+}
+
+type BackGround struct {
+	Name string
+	BonusMemoryDuration int
+	BonusVisionRadius int
+	BonusMana float32
+	BonusManaRegen float32
+	BonusHealth float32
+	BonusHealthRegen float32
+	BonusArmor int
+	BonusEvasion int
+	BonusCritChance int
+	BonusDmgMultuplier float32
 }

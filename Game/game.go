@@ -59,53 +59,49 @@ func(game *Game) chooseBackground() string {
 	return strings.Trim(backGround,"\r\n")
 }
 
-// //this function will create one of the 3 classes for the player
-func (game *Game) createPaladin(charName string, charBackGround string) {
+func (game *Game) createEquipment(hero *Character.Hero) {
 	weapon := game.createWeapon()
 	armor := game.createArmor()
-	
-	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
-		&Point.Point{1, 0, nil}, nil, nil, Character.PaladinDmgMultuplier, Character.PaladinDefence, 
-		Character.PaladinEvasion,Character.PaladinCritChance, Character.PaladinMaxHealth, 
-		Character.PaladinMaxHealth, Character.PaladinHealthRegen, Character.PaladinMaxMana,
-		Character.PaladinMaxMana, Character.PaladinManaRegen, Character.PaladinVisionRadious, 
-		false, make(map[int]*Spells.Buff), true, Character.PaladinTrapHandling}
-	base.EquipWeapon(weapon)
-	base.EquipArmor(armor)
-	game.player = &Character.Hero{&base, "Paladin", charBackGround, make([]*Spells.Spell, 0, 3), 
-		make(map[Point.Point]int), Character.PaladinMemoryDuration}
+	hero.SwapWeapon(weapon)
+	hero.SwapArmor(armor)
+}
+
+// //this function will create one of the 3 classes for the player
+func (game *Game) createPaladin(charName string, charBackGround string) {
+	hero := Character.CreatePaladin(charName, charBackGround, game.start.X, game.start.Y)
+	game.createEquipment(hero)
+	game.player = hero
 }
 
 // //this function will create one of the 3 classes for the player
 func (game *Game) createMage(charName string, charBackGround string) {
-	weapon := game.createWeapon()
-	armor := game.createArmor()
-	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
-		&Point.Point{1, 0, nil}, nil, nil, Character.MageDmgMultuplier, Character.MageDefence, 
-		Character.MageEvasion, Character.MageCritChance, Character.MageMaxHealth, Character.MageMaxHealth,
-		Character.MageHealthRegen, Character.MageMaxMana, Character.MageMaxMana, Character.MageManaRegen, 
-		Character.MageVisionRadious, false, make(map[int]*Spells.Buff), true, Character.MageTrapHandling}
-	base.EquipWeapon(weapon)
-	base.EquipArmor(armor)
-	game.player = &Character.Hero{&base, "Mage", charBackGround, make([]*Spells.Spell, 0, 3), 
-		make(map[Point.Point]int), Character.MageMemoryDuration}
+	hero := Character.CreateMage(charName, charBackGround, game.start.X, game.start.Y)
+	game.createEquipment(hero)
+	game.player = hero
 }
-
-// //Add some function for chace go hit/evade
 
 // //this function will create one of the 3 classes for the player
 func (game *Game) createRouge(charName string, charBackGround string) {
-	weapon := game.createWeapon()
-	armor := game.createArmor()
-	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
-		&Point.Point{1, 0, nil}, nil, nil, Character.RougeDmgMultuplier, Character.RougeDefence, 
-		Character.RougeEvasion, Character.RougeCritChance, Character.RougeMaxHealth, Character.RougeMaxHealth, 
-		Character.RougeHealthRegen, Character.RougeMaxMana, Character.RougeMaxMana, Character.RougeManaRegen, 
-		Character.RougeVisionRadious, false, make(map[int]*Spells.Buff), true, Character.RougeTrapHandling}
-	base.EquipWeapon(weapon)
-	base.EquipArmor(armor)
-	game.player = &Character.Hero{&base, "Rouge", charBackGround, make([]*Spells.Spell, 0, 3), 
-		make(map[Point.Point]int), Character.RougeMemoryDuration}
+	hero := Character.CreateRouge(charName, charBackGround, game.start.X, game.start.Y)
+	game.createEquipment(hero)
+	game.player = hero
+}
+
+func (game *Game) addBackground(charBackGround string, hero *Character.Hero) {
+	switch charBackGround {
+	case Character.BackGroundNameGiant:
+		backGround := Character.CreateBgGiant()
+		hero.ApplyBackground(backGround)
+	case Character.BackGroundNameToreador:
+		backGround := Character.CreateBgToreador()
+		hero.ApplyBackground(backGround)
+	case Character.BackGroundNameCartographer:
+		backGround := Character.CreateBgCartographer()
+		hero.ApplyBackground(backGround)
+	case Character.BackGroundNameLibrarian:	
+		backGround := Character.CreateBgLibrarian()
+		hero.ApplyBackground(backGround)
+	}
 }
 
 // //this function will handle user input adn desired character creation
@@ -121,15 +117,9 @@ func (game *Game) createHero() {
 	case "Mage":
 		game.createMage(charName, charBackGround)
 	}
+	game.addBackground(charBackGround, game.player)
 	game.player.MemorizeLabyrinth(game.labyrinth, game.player.Base.Location)
 }
-
-// // the function will calculate the final score the player has acheived
-// //depending on turs passed, mosters killed, cheasts looted
-// func (game *Game) CalculateFinalScore() {
-
-// }
-
 
 // //this function will save a highscore to a file
 // func (game *Game) SaveHighScore() {
@@ -496,11 +486,6 @@ func (game *Game) cameraReset() {
 // }
 
 // //function will set the win condotion when the end of the maze has benn found
-// func (game *Game) EndReached() bool {
-// 	return true
-// }
-
-// //function will set the win condotion when the end of the maze has benn found
 // func (game *Game) Evaluation() {
 // 	return true
 // }
@@ -523,7 +508,7 @@ func (game *Game) createMonster(x int, y int) Character.NPC{
 	armor := game.createArmor()
 	//TRANSFER VALUES TO SEPARATE FILE
 	monster := Character.NPC{&Point.Point{x, y, nil}, Labyrinth.Monster, "Skeleton", &Point.Point{-1, 0, nil},
-	nil, nil, 1,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spells.Buff), false, 1}
+	nil, nil, 2.5,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spells.Buff), false, 1}
 	monster.EquipArmor(armor)
 	monster.EquipWeapon(weapon)
 	return monster
@@ -774,6 +759,13 @@ func (game *Game) clearScreen() {
 	c.Run()
 }
 
+func (game *Game) applyRegenToAll() {
+	game.player.Base.Regenerate()
+	for _, monster := range game.monsterList {
+		monster.Regenerate()
+	}
+}
+
 //main loop cycle for the game
 func (game *Game) Run() {
 	game.initialize()
@@ -783,6 +775,7 @@ func (game *Game) Run() {
 		game.draw()
 		game.playerAction()
 		game.npcsTurn()
+		game.applyRegenToAll()
 		game.turns++
 		if game.playerDefeted || game.gameCompleted {
 			break
