@@ -51,21 +51,42 @@ func (game *Game) spellOnCoolDownMessage(spell *Spell.Spell) {
 	time.Sleep(2000 * time.Millisecond)
 }
 
+func (game *Game) useBuffSpellMessage(spell *Spell.Spell, hero *Character.Hero) {
+	fmt.Printf("%s is now buffed with %s for %v turns", hero.Base.Name, spell.SpellName, spell.Duration)
+	time.Sleep(2000 * time.Millisecond)
+}
+
+func (game *Game) buffFadeMessage(spell *Spell.Buff) {
+	fmt.Printf("%s fades away", spell.BuffName)
+	time.Sleep(2000 * time.Millisecond)
+}
+
+func (game *Game) lowManaMessage(spell *Spell.Spell) {
+	fmt.Printf("Not enough MP to cast %s. Spell Requires %v MP", spell.SpellName, spell.ManaCost)
+	time.Sleep(2000 * time.Millisecond)
+}
+
 func (game *Game) useSpell(spell *Spell.Spell, hero *Character.Hero) {
-	if spell.IsSelfTargeted && !spell.IsBuff {
+	if spell.ManaCost < hero.Base.CurrentMana {
 		if !spell.IsOnCoolDown {
-			hero.UseInstantSpell(spell)
-			game.useInstantSpellMessage(spell, hero)
-			spell.GoOnCoolDown()
+			if spell.IsSelfTargeted && !spell.IsBuff {
+				hero.UseInstantSpell(spell)
+				game.useInstantSpellMessage(spell, hero)
+				spell.GoOnCoolDown()
+			} else if spell.IsSelfTargeted && spell.IsBuff {
+				hero.UseBuffSpell(spell)
+				game.useBuffSpellMessage(spell, hero)
+				spell.GoOnCoolDown()
+			} else if spell.IsProjectile {
+				// asd
+			} else if spell.IsAreaOfEffect {
+				// asfd
+			}
 		} else {
 			game.spellOnCoolDownMessage(spell)
 		}
-	} else if spell.IsSelfTargeted && spell.IsBuff {
-		// afas
-	} else if spell.IsProjectile {
-		// asd
-	} else if spell.IsAreaOfEffect {
-		// asfd
+	} else {
+		game.lowManaMessage(spell)
 	}
 }
 
@@ -819,12 +840,34 @@ func (game *Game) lowerCoolDownOnSpells() {
 	}
 }
 
+func (game *Game) lowerCharacterBuffDuration(character *Character.NPC) {
+	for _, buff := range character.BuffList {
+		if buff.Duration > 0 {
+			buff.Duration--	
+		} else {
+			character.RemoveBuff(buff)
+			if character.IsHuman {
+				game.buffFadeMessage(buff)
+			}
+			delete(character.BuffList, buff.BuffID)
+		}
+	}
+}
+
+func (game *Game) manageSpells(){
+	game.lowerCoolDownOnSpells()
+	game.lowerCharacterBuffDuration(game.player.Base)
+	for _, monster := range game.monsterList {
+		game.lowerCharacterBuffDuration(monster)
+	}
+}
+
 //main loop cycle for the game
 func (game *Game) Run() {
 	game.initialize()
 
 	for  {
-		game.lowerCoolDownOnSpells()
+		game.manageSpells()
 		game.player.UpdateMemory()
 		game.draw()
 		game.playerAction()

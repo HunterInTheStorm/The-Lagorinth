@@ -197,7 +197,7 @@ type NPC struct {
 	CurrentMana, MaxMana, ManaRegen float32
 	VisionRadious int
 	IsStunned bool
-	Buffs map[int]*Spell.Buff
+	BuffList map[int]*Spell.Buff
 	IsHuman bool
 	TrapHandling int
 }
@@ -346,6 +346,26 @@ func (npc *NPC) RegenMana() {
 	}
 }
 
+func (npc *NPC) ApplyBuff(buff *Spell.Buff) {
+	npc.HealthRegen += buff.BonusHealthRegen
+	npc.DmgMultuplier += buff.BonusDamageMultiplier
+	npc.Weapon.BonusDmg += buff.BonusDamage
+	npc.Defence += buff.BonusDefence
+	npc.Evasion += buff.BonusEvasion
+	npc.CritChance += buff.BonusCritChance
+	npc.ManaRegen -= buff.ManaCostPerTurn
+}
+
+func (npc *NPC) RemoveBuff(buff *Spell.Buff) {
+	npc.HealthRegen -= buff.BonusHealthRegen
+	npc.DmgMultuplier -= buff.BonusDamageMultiplier
+	npc.Weapon.BonusDmg -= buff.BonusDamage
+	npc.Defence -= buff.BonusDefence
+	npc.Evasion -= buff.BonusEvasion
+	npc.CritChance -= buff.BonusCritChance
+	npc.ManaRegen += buff.ManaCostPerTurn
+}
+
 func (npc *NPC) Regenerate() {
 	npc.RegenMana()
 	npc.RegenHealth()
@@ -401,13 +421,21 @@ func (hero *Hero) UseInstantSpell(spell *Spell.Spell) {
 	}
 }
 
+//a spell from the list of selfcast spells will be envoked
+func (hero *Hero) UseBuffSpell(spell *Spell.Spell) {
+	hero.Base.CurrentMana -= spell.ManaCost
+	buff := spell.CreateBuff()
+	if _, ok := hero.Base.BuffList[spell.BuffId]; !ok {
+		hero.Base.BuffList[spell.BuffId] = buff
+		hero.Base.ApplyBuff(buff)
+	} else {
+		currentBuff := hero.Base.BuffList[spell.BuffId]
+		currentBuff.Duration = spell.Duration
+	}
+}
+
 // //a spell from the list of targetble spells will be envoked
 // func (hero *Hero) UseProjectileSpell() Projectile {
-
-// }
-
-// //a spell from the list of selfcast spells will be envoked
-// func (hero *Hero) UseSelfTargetSpell() Buff {
 
 // }
 

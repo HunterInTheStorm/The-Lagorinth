@@ -2,6 +2,8 @@ package Spell
 
 import "github.com/golang/The-Lagorinth/Point"
 
+var id int = 0
+
 func PaladinSpellHeal(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point
@@ -18,6 +20,7 @@ func PaladinSpellHeal(point *Point.Point) *Spell {
 	var regainHealth float32 = 42.0
 	var manaCost float32 = 20.0
 	//buff
+	var buffId int = id
 	var manaCostPerSecond float32 = 0.0
 	var bonusHealthRegen float32 = 0.0
 	var bonusDamageMultiplier float32 = 0.0 
@@ -37,8 +40,9 @@ func PaladinSpellHeal(point *Point.Point) *Spell {
 	spell := Spell{origin, symbol, spellName, isSelfTargeted, isProjectile, isAreaOfEffect,
 		isBuff, regainHealth, bonusHealthRegen, manaCost, manaCostPerSecond,bonusDamageMultiplier,
 		radius, duration, damage, bonusDamage, bonusDefence,bonusEvasion, bonusCritChance, willStun,
-		canDestroyWall, willApplyToEnemies, cooldownTime, coolDownTimeLeft, isOnCoolDown}
+		canDestroyWall, willApplyToEnemies, cooldownTime, coolDownTimeLeft, isOnCoolDown, buffId}
 
+	id++
 	return &spell
 }
 
@@ -58,6 +62,7 @@ func PaladinSpellHolyArmor(point *Point.Point) *Spell {
 	var regainHealth float32 = 0.0
 	var manaCost float32 = 10.0 
 	//buff
+	var buffId int = id
 	var manaCostPerSecond float32= 3.0
 	var bonusHealthRegen float32 = 1.0
 	var bonusDamageMultiplier float32= 0.0 
@@ -77,8 +82,9 @@ func PaladinSpellHolyArmor(point *Point.Point) *Spell {
 	spell := Spell{origin, symbol, spellName, isSelfTargeted, isProjectile, isAreaOfEffect,
 		isBuff, regainHealth, bonusHealthRegen, manaCost, manaCostPerSecond,bonusDamageMultiplier,
 		radius, duration, damage, bonusDamage, bonusDefence,bonusEvasion, bonusCritChance, willStun,
-		canDestroyWall, willApplyToEnemies, cooldownTime, coolDownTimeLeft, isOnCoolDown}
+		canDestroyWall, willApplyToEnemies, cooldownTime, coolDownTimeLeft, isOnCoolDown, buffId}
 
+	id++
 	return &spell
 }
 
@@ -98,6 +104,7 @@ func PaladinSpellHolyBolt(point *Point.Point) *Spell {
 	var regainHealth float32 = 0.0
 	var manaCost float32 = 25.0 
 	//buff
+	var buffID int = id
 	var manaCostPerSecond float32= 0.0
 	var bonusHealthRegen float32 = 0.0
 	var bonusDamageMultiplier float32= 0.0
@@ -117,13 +124,11 @@ func PaladinSpellHolyBolt(point *Point.Point) *Spell {
 	spell := Spell{origin, symbol, spellName, isSelfTargeted, isProjectile, isAreaOfEffect,
 		isBuff, regainHealth, bonusHealthRegen, manaCost, manaCostPerSecond,bonusDamageMultiplier,
 		radius, duration, damage, bonusDamage, bonusDefence,bonusEvasion, bonusCritChance, willStun,
-		canDestroyWall, willApplyToEnemies, cooldownTime, coolDownTimeLeft, isOnCoolDown}
+		canDestroyWall, willApplyToEnemies, cooldownTime, coolDownTimeLeft, isOnCoolDown, buffID}
 
+	id++
 	return &spell
 }
-
-
-var id int = 0
 
 type Spell struct {
 	Origin *Point.Point
@@ -131,7 +136,7 @@ type Spell struct {
 	SpellName string
 	IsSelfTargeted, IsProjectile, IsAreaOfEffect, IsBuff bool
 	RegainHealth, BonusHealthRegen float32
-	ManaCost, ManaCostPerSecond float32
+	ManaCost, ManaCostPerTurn float32
 	BonusDamageMultiplier float32
 	Radius, Duration int
 	Damage int
@@ -140,6 +145,7 @@ type Spell struct {
 	CoolDownTime int
 	CoolDownTimeLeft int
 	IsOnCoolDown bool
+	BuffId int
 }
 
 func (spell *Spell) GoOnCoolDown() {
@@ -156,6 +162,24 @@ func (spell *Spell) LowerCoolDownTime() {
 	}
 }
 
+func (spell *Spell) CreateBuff() *Buff {
+	var buffName string = spell.SpellName
+	var buffID int = spell.BuffId
+	var bonusHealthRegen float32 = spell.BonusHealthRegen
+	var bonusDamageMultiplier float32 = spell.BonusDamageMultiplier
+	var duration int = spell.Duration
+	var bonusDamage int = spell.BonusDamage
+	var bonusDefence int = spell.BonusDefence
+	var bonusEvasion int = spell.BonusEvasion
+	var bonusCritChance int = spell.BonusCritChance
+	var willApplyToEnemies bool = spell.WillApplyToEnemies
+	var manaCostPerTurn float32 = spell.ManaCostPerTurn
+
+	buff := Buff{buffName, buffID, bonusHealthRegen, bonusDamageMultiplier, duration,
+		bonusDamage, bonusDefence, bonusEvasion, bonusCritChance, willApplyToEnemies, manaCostPerTurn}
+
+	return &buff
+}
 
 // func (spell Spell) CreateBuff(hero *Character) Buff {
 // 	buffName string
@@ -232,12 +256,14 @@ type Effect struct {
 
 
 type Buff struct {
-	buffName string
-	buffID int
-	bonusHealthRegen float32
-	bonusDamageMultiplier float32
-	duration int
-	bonusDamage, bonusDefence, bonusEvasion, bonusCritChance int
+	BuffName string
+	BuffID int
+	BonusHealthRegen float32
+	BonusDamageMultiplier float32
+	Duration int
+	BonusDamage, BonusDefence, BonusEvasion, BonusCritChance int
+	WillApplyToEnemies bool
+	ManaCostPerTurn float32
 }
 
 // func (buff Buff) ApplyBuff() {
