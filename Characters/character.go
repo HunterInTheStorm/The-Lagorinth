@@ -86,39 +86,74 @@ type NPC struct {
 	TrapHandling int
 }
 
-//a npc will move one forward depemding on its orientation
-func (npc *NPC) Move() {
+func (npc *NPC) moveTowardsHero(labyrinth *Labyrinth.Labyrinth) (bool, *Point.Point) {
+	upTile :=	labyrinth.Labyrinth[npc.Location.X - 1][npc.Location.Y]
+	if upTile == Labyrinth.CharSymbol {
+		return true, &Point.Point{npc.Location.X - 1, npc.Location.Y, nil}
+	}
+	downTile := labyrinth.Labyrinth[npc.Location.X + 1][npc.Location.Y]
+	if downTile == Labyrinth.CharSymbol {
+		return true, &Point.Point{npc.Location.X + 1, npc.Location.Y, nil}
+	}
+	leftTile := labyrinth.Labyrinth[npc.Location.X][npc.Location.Y - 1]
+	if leftTile == Labyrinth.CharSymbol {
+		return true, &Point.Point{npc.Location.X, npc.Location.Y - 1, nil}
+	}
+	rightTile := labyrinth.Labyrinth[npc.Location.X][npc.Location.Y + 1]
+	if rightTile == Labyrinth.CharSymbol {
+		return true, &Point.Point{npc.Location.X, npc.Location.Y + 1, nil}
+	}
+	return false, &Point.Point{}
+}
 
+func (npc *NPC) makeDecisionWhereToMove(labyrinth *Labyrinth.Labyrinth) (bool, *Point.Point) {
+	frontTile := labyrinth.Labyrinth[npc.Location.X + npc.Orientation.X][npc.Location.Y + npc.Orientation.Y]
+	if frontTile != Labyrinth.Wall && frontTile != Labyrinth.Monster && frontTile != Labyrinth.Treasure {
+		if rand.Intn(100) < 80 {
+			return true, &Point.Point{npc.Location.X + npc.Orientation.X, npc.Location.Y + npc.Orientation.Y, nil}
+		}
+	} else {
+		direction := make([]Point.Point, 0, 4)
+		upTile := labyrinth.Labyrinth[npc.Location.X - 1][npc.Location.Y]
+		if upTile != Labyrinth.Wall && upTile != Labyrinth.Monster && upTile != Labyrinth.Treasure {
+			direction = append(direction, Point.Point{npc.Location.X - 1, npc.Location.Y, nil})
+		}
+		downTile := labyrinth.Labyrinth[npc.Location.X + 1][npc.Location.Y]
+		if downTile != Labyrinth.Wall && downTile != Labyrinth.Monster && downTile != Labyrinth.Treasure {
+			direction = append(direction, Point.Point{npc.Location.X + 1, npc.Location.Y, nil})
+		}
+		leftTile := labyrinth.Labyrinth[npc.Location.X][npc.Location.Y - 1]
+		if leftTile != Labyrinth.Wall && leftTile != Labyrinth.Monster && leftTile != Labyrinth.Treasure {
+			direction = append(direction, Point.Point{npc.Location.X, npc.Location.Y - 1, nil})
+		}
+		rightTile := labyrinth.Labyrinth[npc.Location.X][npc.Location.Y + 1]
+		if rightTile != Labyrinth.Wall && rightTile != Labyrinth.Monster && rightTile != Labyrinth.Treasure {
+			direction = append(direction, Point.Point{npc.Location.X, npc.Location.Y + 1, nil})
+		}
+		if len(direction) != 0 {
+			return true, &direction[rand.Intn(len(direction))]
+		}
+	}
+	return false, &Point.Point{-1,-1,nil}
+}
+
+//a npc will move one forward depemding on its orientation
+func (npc *NPC) Move(labyritnh *Labyrinth.Labyrinth) *Point.Point {
+	isNextToHero, location := npc.moveTowardsHero(labyritnh)
+	if isNextToHero {
+		return location
+	}
+	isDecisionMade, place := npc.makeDecisionWhereToMove(labyritnh)
+	if isDecisionMade {
+		return place
+	}
+	return npc.Location
 }
 
 //function that changes the orientation of a npc
-func (npc *NPC) ChangeOrientation(x1 int, x2 int, y1 int, y2 int) {
-	npc.Orientation.X = x1 - x2
-	npc.Orientation.Y = y1- y2
-}
-
-//function that updates the coordinates of an character so that he move one up
-func (npc *NPC) MoveNorth() {
-	npc.Location.X = npc.Location.X - 1
-	npc.ChangeOrientation(npc.Location.X, npc.Location.X - 1, npc.Location.Y, npc.Location.Y)
-}
-
-//function that updates the coordinates of an character so that he move one down
-func (npc *NPC) MoveSouth() {
-	npc.Location.X = npc.Location.X + 1
-	npc.ChangeOrientation(npc.Location.X, npc.Location.X + 1, npc.Location.Y, npc.Location.Y)
-}
-
-//function that updates the coordinates of an character so that he move one left
-func (npc *NPC) MoveWest() {
-	npc.Location.Y = npc.Location.Y - 1
-	npc.ChangeOrientation(npc.Location.X, npc.Location.X, npc.Location.Y, npc.Location.Y - 1)
-}
-
-//function that updates the coordinates of an character so that he move one right
-func (npc *NPC) MoveEast() {
-	npc.Location.Y = npc.Location.Y + 1
-	npc.ChangeOrientation(npc.Location.X, npc.Location.X, npc.Location.Y, npc.Location.Y + 1)
+func (npc *NPC) ChangeOrientation(x2 int, y2 int) {
+	npc.Orientation.X = x2 - npc.Location.X
+	npc.Orientation.Y = y2 - npc.Location.Y
 }
 
 //add all of the values of a weapon's properties to the character's
@@ -319,11 +354,6 @@ func (trap *Trap) Randomize(loc *Point.Point) {
 	trap.MinDmg = rand.Intn(6) + 1
 	trap.MaxDmg = rand.Intn(6) + trap.MinDmg
 }
-
-// //the function returns the damage(integer) the character will do to an enemy
-// func (trap Trap) DoDamage() int {
-// 	return 99
-// }
 
 func (trap *Trap) DamageTrap() float32 {
 	damageRange := trap.MaxDmg - trap.MinDmg

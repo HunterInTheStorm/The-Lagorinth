@@ -264,6 +264,7 @@ func (game *Game) findEnemy(requiredX int, requiredY int) (int, *Character.NPC) 
 
 //this function will handle the fight event
 func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
+	character.ChangeOrientation(enemyX, enemyY)
 	place, enemy := game.findEnemy(enemyX, enemyY)
 	damage := character.DoDamage()
 	//include backstab bonus somewhere around here
@@ -271,12 +272,15 @@ func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
 		game.avoidAttackMessage(character.Name, enemy.Name)
 	} else {
 	enemy.TakeDamage(damage)
+	enemy.ChangeOrientation(character.Location.X, character.Location.Y)
 	game.takeDamageMessage(damage, character, enemy)
 	}
 	game.isCharacterDefeted(enemy, place)
 }
 
 func (game *Game) characterMoveTo(character *Character.NPC, x int, y int) {
+	game.restoreTile(character.Location.X, character.Location.Y)
+	character.ChangeOrientation(x, y)
 	character.Location.X = x
 	character.Location.Y = y
 }
@@ -285,15 +289,26 @@ func (game *Game) characterMoveTo(character *Character.NPC, x int, y int) {
 func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
 	switch game.labyrinth.Labyrinth[x][y] {
 	case Labyrinth.Pass:
-		game.characterMoveTo(character, x, y)
+		if character.IsHuman {
+			game.characterMoveTo(character, x, y)
+			game.drawHero()
+		} else {
+			game.characterMoveTo(character, x, y)
+		}
 	case Labyrinth.StartPosition:
-		game.characterMoveTo(character, x, y)
+		if character.IsHuman {
+			game.characterMoveTo(character, x, y)
+			game.drawHero()
+		} else {
+			game.characterMoveTo(character, x, y)
+		}
 	case Labyrinth.Monster:
 		if character.IsHuman {
 			game.fight(character, x, y)
 		}
 	case Labyrinth.CharSymbol:
 		if !character.IsHuman {
+			game.draw()
 			game.fight(character, x, y)
 		}
 	case Labyrinth.Trap:
@@ -301,6 +316,7 @@ func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
 			game.encounterTrap(character, x, y)
 		} else {
 			game.characterMoveTo(character, x, y)
+			game.drawHero()
 		}
 	case Labyrinth.Treasure:
 		//get the loot
@@ -308,6 +324,7 @@ func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
 		if character.IsHuman {
 			game.exitFound()
 			game.characterMoveTo(character, x, y)
+			game.drawHero()
 		} else {
 			game.characterMoveTo(character, x, y)
 		}
@@ -327,7 +344,6 @@ func (game *Game) restoreTile(x int, y int) {
 //function takes user input and send it to PlayerActionEvent
 func (game *Game) playerAction() {
 	key := game.detectKeyPress()
-	game.restoreTile(game.player.Base.Location.X, game.player.Base.Location.Y)
 	switch key {
 	case "w":
 		game.plyerActionEvent(game.player.Base.Location.X - 1, game.player.Base.Location.Y, game.player.Base)
@@ -493,16 +509,27 @@ func (game *Game) initialize() {
 	game.createHero()
 }
 
-// //function replaces an element fro the 2d array for the maze with the character symbol
-func (game *Game) drawCharacters() {
+func (game *Game) drawHero() {
 	game.labyrinth.Labyrinth[game.player.Base.Location.X][game.player.Base.Location.Y] = Labyrinth.CharSymbol
+}
+
+func (game *Game) drawTraps() {
 	for trapPoint, _ := range game.trapList {
 		game.labyrinth.Labyrinth[trapPoint.X][trapPoint.Y] = Labyrinth.Trap
 	}
-	//add projectile here
+}
+
+func (game *Game) drawMonsters() {
 	for _, mon := range game.monsterList {
 		game.labyrinth.Labyrinth[mon.Location.X][mon.Location.Y] = mon.Symbol
 	}
+}
+// //function replaces an element fro the 2d array for the maze with the character symbol
+func (game *Game) drawCharacters() {
+	game.drawTraps()
+	game.drawHero()
+	//add projectile here
+	game.drawMonsters()
 }
 
 //function to draw the labyrinth
@@ -642,10 +669,17 @@ func (game *Game) checkTraps() {
 	}
 }
 
+func (game *Game) moveMonsters() {
+	for _, monster := range game.monsterList {
+		location := monster.Move(game.labyrinth)
+		game.plyerActionEvent(location.X, location.Y, monster)
+	}
+}
+
 func (game *Game) npcsTurn() {
 	//spells
 	game.checkTraps()
-	//monsters
+	game.moveMonsters()
 }
 
 func (game *Game) clearScreen() {
