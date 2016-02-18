@@ -18,6 +18,7 @@ var BackGroundNameLibrarian string = "librarian"
 // //this function will create one of the 3 classes for the player
 func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
 	//NPC
+	location := Point.Point{x, y, nil}
 	var dmgMultuplier float32 = 6.5
 	var defence int = 6 
 	var evasion int = 3
@@ -30,15 +31,21 @@ func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
 	var trapHandling int = 1
 
 	//Character
-	// SpellLList []Spells.Spell
+	spellList := make([]*Spell.Spell, 0, 3)
+	spell1 := Spell.PaladinSpellHeal(&location)
+	spellList = append(spellList, spell1)
+	spell2 := Spell.PaladinSpellHolyArmor(&location)
+	spellList = append(spellList, spell2)
+	spell3 := Spell.PaladinSpellHolyBolt(&location)
+	spellList = append(spellList, spell3)
 	memory := make(map[Point.Point]int)
 	var memoryDuration int = 17
 
-	base := NPC{&Point.Point{x, y, nil}, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
+	base := NPC{&location, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
-		maxMana, manaRegen, visionRadious, false, make(map[int]*Spells.Buff), true, trapHandling}
+		maxMana, manaRegen, visionRadious, false, make(map[int]*Spell.Buff), true, trapHandling}
 	
-	hero := Hero{&base, PaladinClassName, charBackGround, make([]*Spells.Spell, 0, 3), 
+	hero := Hero{&base, PaladinClassName, charBackGround, spellList, 
 		memory, memoryDuration}
 	return &hero
 }
@@ -46,6 +53,7 @@ func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
 // //this function will create one of the 3 classes for the player
 func CreateMage(charName string, charBackGround string, x int, y int) *Hero {
 	//NPC
+	location := Point.Point{x, y, nil}
 	var dmgMultuplier float32= 1.2
 	var defence int = 6 
 	var evasion int = 3
@@ -61,11 +69,11 @@ func CreateMage(charName string, charBackGround string, x int, y int) *Hero {
 	memory := make(map[Point.Point]int)
 	var memoryDuration int = 12
 
-	base := NPC{&Point.Point{x, y, nil}, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
+	base := NPC{&location, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
-		maxMana, manaRegen, visionRadious, false, make(map[int]*Spells.Buff), true, trapHandling}
+		maxMana, manaRegen, visionRadious, false, make(map[int]*Spell.Buff), true, trapHandling}
 	
-	hero := Hero{&base, MageClassName, charBackGround, make([]*Spells.Spell, 0, 3), 
+	hero := Hero{&base, MageClassName, charBackGround, make([]*Spell.Spell, 0, 3), 
 		memory, memoryDuration}
 	
 	return &hero
@@ -75,6 +83,7 @@ func CreateMage(charName string, charBackGround string, x int, y int) *Hero {
 func CreateRouge(charName string, charBackGround string, x int, y int) *Hero {
 	//ROUGE
 	//NPC
+	location := Point.Point{x, y, nil}
 	var dmgMultuplier float32 = 1.2
 	var defence int = 6 
 	var evasion int = 3
@@ -92,11 +101,11 @@ func CreateRouge(charName string, charBackGround string, x int, y int) *Hero {
 	var memoryDuration int = 10
 
 
-	base := NPC{&Point.Point{x, y, nil}, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
+	base := NPC{&location, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
-		maxMana, manaRegen, visionRadious, false, make(map[int]*Spells.Buff), true, trapHandling}
+		maxMana, manaRegen, visionRadious, false, make(map[int]*Spell.Buff), true, trapHandling}
 	
-	hero := Hero{&base, RougeClassName, charBackGround, make([]*Spells.Spell, 0, 3), 
+	hero := Hero{&base, RougeClassName, charBackGround, make([]*Spell.Spell, 0, 3), 
 		memory, memoryDuration}
 
 	return &hero
@@ -188,7 +197,7 @@ type NPC struct {
 	CurrentMana, MaxMana, ManaRegen float32
 	VisionRadious int
 	IsStunned bool
-	Buffs map[int]*Spells.Buff
+	Buffs map[int]*Spell.Buff
 	IsHuman bool
 	TrapHandling int
 }
@@ -346,7 +355,7 @@ type Hero struct {
 	Base *NPC
 	ClassName string
 	BackGround string
-	SpellLList []*Spells.Spell
+	SpellList []*Spell.Spell
 	Memory map[Point.Point]int
 	MemoryDuration int
 }
@@ -377,6 +386,19 @@ func (hero *Hero) ApplyBackground(background *BackGround) {
 	hero.Base.Evasion += background.BonusEvasion
 	hero.Base.CritChance += background.BonusCritChance
 	hero.Base.DmgMultuplier += background.BonusDmgMultuplier
+}
+
+func (hero *Hero) UseInstantSpell(spell *Spell.Spell) {
+	hero.Base.CurrentMana -= spell.ManaCost
+	hero.Base.CurrentHealth += spell.RegainHealth
+
+	if hero.Base.CurrentMana > hero.Base.MaxMana {
+		hero.Base.CurrentMana = hero.Base.MaxMana
+	}
+
+	if hero.Base.CurrentHealth > hero.Base.MaxHealth {
+		hero.Base.CurrentHealth = hero.Base.MaxHealth
+	}
 }
 
 // //a spell from the list of targetble spells will be envoked

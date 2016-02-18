@@ -32,6 +32,42 @@ type Game struct {
 	cameraRadius int
 }
 
+func (game *Game) useInstantSpellMessage(spell *Spell.Spell, hero *Character.Hero) {
+	fmt.Printf("%s uses %s.", hero.Base.Name, spell.SpellName)
+	if spell.ManaCost > 0 {
+		fmt.Printf("%s restores %v HP for %v MP", hero.Base.Name, spell.RegainHealth, spell.ManaCost)
+	} else{
+		fmt.Printf("%s restores %v MP for %v HP", hero.Base.Name, spell.ManaCost, spell.RegainHealth)
+	}
+	time.Sleep(2000 * time.Millisecond)
+}
+
+func (game *Game) spellOnCoolDownMessage(spell *Spell.Spell) {
+	if spell.CoolDownTimeLeft != 1 {
+		fmt.Printf("%s is on CD for %v turns", spell.SpellName, spell.CoolDownTimeLeft)
+	} else {
+		fmt.Printf("%s is on CD for %v turn", spell.SpellName, spell.CoolDownTimeLeft)
+	}
+	time.Sleep(2000 * time.Millisecond)
+}
+
+func (game *Game) useSpell(spell *Spell.Spell, hero *Character.Hero) {
+	if spell.IsSelfTargeted && !spell.IsBuff {
+		if !spell.IsOnCoolDown {
+			hero.UseInstantSpell(spell)
+			game.useInstantSpellMessage(spell, hero)
+			spell.GoOnCoolDown()
+		} else {
+			game.spellOnCoolDownMessage(spell)
+		}
+	} else if spell.IsSelfTargeted && spell.IsBuff {
+		// afas
+	} else if spell.IsProjectile {
+		// asd
+	} else if spell.IsAreaOfEffect {
+		// asfd
+	}
+}
 
 func(game *Game) chooseName() string {
 	fmt.Println("What is your name mighty adventurer?")
@@ -429,14 +465,14 @@ func (game *Game) playerAction() {
 	case "d":
 		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y + 1, game.player.Base)
 		game.cameraReset()
-	case "e":
+	case "exit":
 		game.playerDefeted = true
 	case "1":
-		fmt.Println("SO FAR SO GOOD, SPELL CAST 1")
+		game.useSpell(game.player.SpellList[0], game.player)
 	case "2":
-		fmt.Println("SO FAR SO GOOD, SPELL CAST 2")
+		game.useSpell(game.player.SpellList[1], game.player)
 	case "3":
-		fmt.Println("SO FAR SO GOOD, SCELL CAST 3")
+		game.useSpell(game.player.SpellList[2], game.player)
 	case "4":
 		game.cameraMoveLeft()
 		game.draw()
@@ -509,7 +545,7 @@ func (game *Game) createMonster(x int, y int) Character.NPC{
 	armor := game.createArmor()
 	//TRANSFER VALUES TO SEPARATE FILE
 	monster := Character.NPC{&Point.Point{x, y, nil}, Labyrinth.Monster, "Skeleton", &Point.Point{-1, 0, nil},
-	nil, nil, 2.5,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spells.Buff), false, 1}
+	nil, nil, 2.5,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spell.Buff), false, 1}
 	monster.EquipArmor(armor)
 	monster.EquipWeapon(weapon)
 	return monster
@@ -777,11 +813,18 @@ func (game *Game) applyRegenToAll() {
 	}
 }
 
+func (game *Game) lowerCoolDownOnSpells() {
+	for _, spell := range game.player.SpellList {
+		spell.LowerCoolDownTime()
+	}
+}
+
 //main loop cycle for the game
 func (game *Game) Run() {
 	game.initialize()
 
 	for  {
+		game.lowerCoolDownOnSpells()
 		game.player.UpdateMemory()
 		game.draw()
 		game.playerAction()
