@@ -168,7 +168,6 @@ func (npc *NPC) UnequipWeapon() {
 
 //add all of the values of a armor's properties to the character's
 func (npc *NPC) EquipArmor(newArmor *Items.Armor) {
-	npc.UnequipArmor()
 	npc.Armor = newArmor
 	npc.CurrentHealth = npc.CurrentHealth + newArmor.Health
 	npc.MaxHealth = npc.MaxHealth + newArmor.Health
@@ -233,14 +232,16 @@ type Hero struct {
 }
 
 // //will replace the bonuses given from one weapon for the bonuses of another
-// func (hero *Hero) SwapWeapon() {
-
-// }
+func (hero *Hero) SwapWeapon(weapon *Items.Weapon) {
+	hero.Base.UnequipWeapon()
+	hero.Base.EquipWeapon(weapon)
+}
 
 // //will replace the bonuses given from one armor for the bonuses of another
-// func (hero *Hero) SwapArmor() {
-
-// }
+func (hero *Hero) SwapArmor(armor *Items.Armor) {
+	hero.Base.UnequipArmor()
+	hero.Base.EquipArmor(armor)
+}
 
 // //a spell from the list of targetble spells will be envoked
 // func (hero *Hero) UseProjectileSpell() Projectile {

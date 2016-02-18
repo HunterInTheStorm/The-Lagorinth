@@ -65,12 +65,13 @@ func (game *Game) createPaladin(charName string, charBackGround string) {
 	armor := game.createArmor()
 	
 	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
-		&Point.Point{1, 0, nil}, &weapon, &armor, Character.PaladinDmgMultuplier, Character.PaladinDefence, 
+		&Point.Point{1, 0, nil}, nil, nil, Character.PaladinDmgMultuplier, Character.PaladinDefence, 
 		Character.PaladinEvasion,Character.PaladinCritChance, Character.PaladinMaxHealth, 
 		Character.PaladinMaxHealth, Character.PaladinHealthRegen, Character.PaladinMaxMana,
 		Character.PaladinMaxMana, Character.PaladinManaRegen, Character.PaladinVisionRadious, 
 		false, make(map[int]*Spells.Buff), true, Character.PaladinTrapHandling}
-
+	base.EquipWeapon(weapon)
+	base.EquipArmor(armor)
 	game.player = &Character.Hero{&base, "Paladin", charBackGround, make([]*Spells.Spell, 0, 3), 
 		make(map[Point.Point]int), Character.PaladinMemoryDuration}
 }
@@ -80,11 +81,12 @@ func (game *Game) createMage(charName string, charBackGround string) {
 	weapon := game.createWeapon()
 	armor := game.createArmor()
 	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
-		&Point.Point{1, 0, nil}, &weapon, &armor, Character.MageDmgMultuplier, Character.MageDefence, 
+		&Point.Point{1, 0, nil}, nil, nil, Character.MageDmgMultuplier, Character.MageDefence, 
 		Character.MageEvasion, Character.MageCritChance, Character.MageMaxHealth, Character.MageMaxHealth,
 		Character.MageHealthRegen, Character.MageMaxMana, Character.MageMaxMana, Character.MageManaRegen, 
 		Character.MageVisionRadious, false, make(map[int]*Spells.Buff), true, Character.MageTrapHandling}
-
+	base.EquipWeapon(weapon)
+	base.EquipArmor(armor)
 	game.player = &Character.Hero{&base, "Mage", charBackGround, make([]*Spells.Spell, 0, 3), 
 		make(map[Point.Point]int), Character.MageMemoryDuration}
 }
@@ -96,11 +98,12 @@ func (game *Game) createRouge(charName string, charBackGround string) {
 	weapon := game.createWeapon()
 	armor := game.createArmor()
 	base := Character.NPC{&Point.Point{game.start.X, game.start.Y, nil}, Labyrinth.CharSymbol, charName,
-		&Point.Point{1, 0, nil}, &weapon, &armor, Character.RougeDmgMultuplier, Character.RougeDefence, 
+		&Point.Point{1, 0, nil}, nil, nil, Character.RougeDmgMultuplier, Character.RougeDefence, 
 		Character.RougeEvasion, Character.RougeCritChance, Character.RougeMaxHealth, Character.RougeMaxHealth, 
 		Character.RougeHealthRegen, Character.RougeMaxMana, Character.RougeMaxMana, Character.RougeManaRegen, 
 		Character.RougeVisionRadious, false, make(map[int]*Spells.Buff), true, Character.RougeTrapHandling}
-
+	base.EquipWeapon(weapon)
+	base.EquipArmor(armor)
 	game.player = &Character.Hero{&base, "Rouge", charBackGround, make([]*Spells.Spell, 0, 3), 
 		make(map[Point.Point]int), Character.RougeMemoryDuration}
 }
@@ -216,18 +219,19 @@ func (game *Game) monsterDefetedMessage(name string, playerName string) {
 	time.Sleep(2000 * time.Millisecond)
 }
 
-func (game *Game) isCharacterDefeted(character *Character.NPC, place int) {
-	if character.CurrentHealth < 0 {
-		switch true {
-		case place == -1:
-			game.playerDefeted = true
-			game.playerDefetedMessage()
-		case place > -1:
-			game.removeMonster(place)
-			game.monsterSlain++
-			game.restoreTile(character.Location.X, character.Location.Y)
-			game.monsterDefetedMessage(character.Name, game.player.Base.Name)
-		}
+func (game *Game) isCharacterDefeted(character *Character.NPC) bool {
+	return character.CurrentHealth < 0
+}
+
+func (game *Game) CharacterDefeted(character *Character.NPC, place int) {
+	switch true {
+	case place == -1:
+		game.playerDefeted = true
+		game.playerDefetedMessage()
+	case place > -1:
+		game.removeMonster(place)
+		game.monsterSlain++
+		game.restoreTile(character.Location.X, character.Location.Y)
 	}
 }
 
@@ -262,6 +266,15 @@ func (game *Game) findEnemy(requiredX int, requiredY int) (int, *Character.NPC) 
  	return -2, &Character.NPC{}
 }
 
+func (game *Game) lootEnemy(character *Character.NPC) {
+	weapon := character.Weapon
+	character.UnequipWeapon()
+	armor := character.Armor
+	character.UnequipArmor()
+	game.newArmorFound(armor)
+	game.newWeaponFound(weapon)
+}
+
 //this function will handle the fight event
 func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
 	character.ChangeOrientation(enemyX, enemyY)
@@ -275,7 +288,13 @@ func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
 	enemy.ChangeOrientation(character.Location.X, character.Location.Y)
 	game.takeDamageMessage(damage, character, enemy)
 	}
-	game.isCharacterDefeted(enemy, place)
+	if game.isCharacterDefeted(enemy) {
+		if !enemy.IsHuman {
+			game.monsterDefetedMessage(character.Name, game.player.Base.Name)
+			game.lootEnemy(enemy)
+		}
+		game.CharacterDefeted(enemy, place)
+	}
 }
 
 func (game *Game) characterMoveTo(character *Character.NPC, x int, y int) {
@@ -319,7 +338,10 @@ func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
 			game.drawHero()
 		}
 	case Labyrinth.Treasure:
-		//get the loot
+		if character.IsHuman {
+			game.openChest()
+			game.characterMoveTo(character, x, y)
+		}
 	case Labyrinth.ExitPosition:
 		if character.IsHuman {
 			game.exitFound()
@@ -331,14 +353,73 @@ func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
 	}
 }
 
+func (game *Game) compareArmor(current *Items.Armor, found *Items.Armor) {
+	fmt.Println("Your Armor\t\t\tNew Armor")
+	fmt.Printf("+Health: %v\t\t\t+Health: %v\n",current.Health, found.Health)
+	fmt.Printf ("+HP Regen: %v\t\t\t+HP Regen: %v\n",current.HealthRegen, found.HealthRegen)
+	fmt.Printf("+Mana: %v\t\t\t+Mana: %v\n",current.Mana, found.Mana)
+	fmt.Printf ("+MP Regen: %v\t\t\t+MP Regen: %v\n",current.ManaRegen, found.ManaRegen)
+	fmt.Printf("+Defence: %v\t\t\t+Defence: %v\n",current.Defence, found.Defence)
+	fmt.Printf("+Evasion: %v\t\t\t+Evasion: %v\n",current.Evasion, found.Evasion)
+}
+
+func (game *Game) compareWeapon(current *Items.Weapon, found *Items.Weapon) {
+	fmt.Println("Your Weapon\t\t\tNew Weapon")
+	fmt.Printf("Damage: %v-%v\t\t\tDamage: %v-%v\n", current.MinDmg, current.MaxDmg, found.MinDmg, found.MaxDmg)
+	fmt.Printf("+BonusDmg: %v\t\t\t+BonusDmg: %v\n",current.BonusDmg, found.BonusDmg)
+	fmt.Printf ("+CritChance: %v\t\t\t+CritChance: %v\n",current.BonusCritChance, found.BonusCritChance)
+}
+
+func (game *Game) newArmorFoundMessage() {
+	fmt.Println("You found a new armor piece! :)\nWould you like to equip it?(y/n)")
+}
+
+func (game *Game) newWeaponFoundMessage() {
+	fmt.Println("You found a new weapon! :)\nWould you like to equip it?(y/n)")
+}
+
+func (game *Game) newArmorFound(found *Items.Armor) {
+	game.clearScreen()
+	game.compareArmor(game.player.Base.Armor, found)
+	game.newArmorFoundMessage()
+	key := game.detectKeyPress()
+	if key == "y" {
+		game.player.SwapArmor(found)
+	}
+}
+
+func (game *Game) newWeaponFound(found *Items.Weapon) {
+	game.clearScreen()
+	game.compareWeapon(game.player.Base.Weapon, found)
+	game.newWeaponFoundMessage()
+	key := game.detectKeyPress()
+	if key == "y" {
+		game.player.SwapWeapon(found)
+	}
+}
+
+func (game *Game) openChest() {
+	if rand.Intn(2) == 0 {
+		armor := game.createArmor()
+		game.newArmorFound(armor)
+	} else {
+		weapon := game.createWeapon()
+		game.newWeaponFound(weapon)
+	}
+}
+
 func (game *Game) exitFound() {
 	game.gameCompleted = true
 }
 
 func (game *Game) restoreTile(x int, y int) {
 	game.labyrinth.Labyrinth[x][y] = Labyrinth.Pass
-	game.labyrinth.Labyrinth[game.start.X][game.start.Y] = Labyrinth.StartPosition
-	game.labyrinth.Labyrinth[game.end.X][game.end.X] = Labyrinth.ExitPosition
+	if game.start.X != game.player.Base.Location.X || game.start.Y != game.player.Base.Location.Y {
+		game.labyrinth.Labyrinth[game.start.X][game.start.Y] = Labyrinth.StartPosition
+	}
+	if game.end.X != game.player.Base.Location.X && game.end.Y != game.player.Base.Location.Y {
+		game.labyrinth.Labyrinth[game.end.X][game.end.X] = Labyrinth.ExitPosition
+	}
 }
 
 //function takes user input and send it to PlayerActionEvent
@@ -424,16 +505,16 @@ func (game *Game) cameraReset() {
 // 	return true
 // }
 
-func(game *Game) createArmor() Items.Armor {
+func(game *Game) createArmor() *Items.Armor {
 	armor := Items.Armor{}
 	armor.RandomizeArmor()
-	return armor
+	return &armor
 }
 
-func(game *Game) createWeapon() Items.Weapon {
+func(game *Game) createWeapon() *Items.Weapon {
 	weapon := Items.Weapon{}
 	weapon.RandomizeWeapon()
-	return weapon
+	return &weapon
 }
 
 // the function will create the monsters in the maze
@@ -441,8 +522,11 @@ func (game *Game) createMonster(x int, y int) Character.NPC{
 	weapon := game.createWeapon()
 	armor := game.createArmor()
 	//TRANSFER VALUES TO SEPARATE FILE
-	return Character.NPC{&Point.Point{x, y, nil}, Labyrinth.Monster, "Skeleton", &Point.Point{-1, 0, nil},
-	&weapon, &armor, 1,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spells.Buff), false, 1}
+	monster := Character.NPC{&Point.Point{x, y, nil}, Labyrinth.Monster, "Skeleton", &Point.Point{-1, 0, nil},
+	nil, nil, 1,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spells.Buff), false, 1}
+	monster.EquipArmor(armor)
+	monster.EquipWeapon(weapon)
+	return monster
 }
 
 // the function will create the traps in the maze
@@ -583,7 +667,9 @@ func (game *Game) triggerDamageTrap(trap *Character.Trap, character *Character.N
 		character.TakeDamage(damage)
 		game.takeDamageFromTrapMessage(damage, Character.TrapTypes[0], character)
 	}
-	game.isCharacterDefeted(character, -1)
+	if game.isCharacterDefeted(character) {
+		game.CharacterDefeted(character, -1)
+	}
 }
 
 
