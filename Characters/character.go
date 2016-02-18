@@ -278,19 +278,25 @@ func (npc *NPC) UnequipWeapon() {
 //add all of the values of a armor's properties to the character's
 func (npc *NPC) EquipArmor(newArmor *Items.Armor) {
 	npc.Armor = newArmor
-	npc.CurrentHealth = npc.CurrentHealth + newArmor.Health
-	npc.MaxHealth = npc.MaxHealth + newArmor.Health
-	npc.CurrentMana = npc.CurrentMana + newArmor.Mana
-	npc.MaxMana = npc.MaxMana + newArmor.Mana
+	npc.CurrentHealth += newArmor.Health
+	npc.MaxHealth += newArmor.Health
+	npc.CurrentMana += newArmor.Mana
+	npc.MaxMana += newArmor.Mana
+	npc.Evasion += newArmor.Evasion
+	npc.HealthRegen += newArmor.HealthRegen
+	npc.ManaRegen += newArmor.ManaRegen
 }
 
 //remove all of the values of a armor's properties from the character's
 func (npc *NPC) UnequipArmor() {
 	if npc.Armor != nil {
-		npc.CurrentHealth = npc.CurrentHealth - npc.Armor.Health
-		npc.MaxHealth = npc.MaxHealth - npc.Armor.Health
-		npc.CurrentMana = npc.CurrentMana - npc.Armor.Mana
-		npc.MaxMana = npc.MaxMana - npc.Armor.Mana
+		npc.CurrentHealth -= npc.Armor.Health
+		npc.MaxHealth -= npc.Armor.Health
+		npc.CurrentMana -= npc.Armor.Mana
+		npc.MaxMana -= npc.Armor.Mana
+		npc.Evasion -= npc.Armor.Evasion
+		npc.HealthRegen -= npc.Armor.HealthRegen
+		npc.ManaRegen -= npc.Armor.ManaRegen
 		npc.Armor = nil
 	}
 }
@@ -317,7 +323,7 @@ func (npc *NPC) TakeDamage(damage float32) {
 
 //Function will update character's currentHealth to a higher value
 func (npc *NPC) RegenHealth() {
-	npc.CurrentHealth = npc.CurrentHealth + npc.HealthRegen + npc.Armor.HealthRegen
+	npc.CurrentHealth = npc.CurrentHealth + npc.HealthRegen
 	if npc.CurrentHealth > npc.MaxHealth {
 		npc.CurrentHealth = npc.MaxHealth
 	}
@@ -325,7 +331,7 @@ func (npc *NPC) RegenHealth() {
 
 //Function will update character's currentMana to a higher value
 func (npc *NPC) RegenMana() {
-	npc.CurrentMana = npc.CurrentMana + npc.ManaRegen + npc.Armor.ManaRegen
+	npc.CurrentMana = npc.CurrentMana + npc.ManaRegen
 	if npc.CurrentMana > npc.MaxMana {
 		npc.CurrentMana = npc.MaxMana
 	}

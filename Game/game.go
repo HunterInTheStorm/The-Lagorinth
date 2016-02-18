@@ -226,19 +226,19 @@ func (game *Game) CharacterDefeted(character *Character.NPC, place int) {
 }
 
 func (game *Game) avoidAttackMessage(attackerName string, defenderName string) {
-	fmt.Println("Defender dodges")
+	fmt.Printf("%s dodges %s's attack",defenderName, attackerName)
 	time.Sleep(2000 * time.Millisecond)
 }
 
 func (game *Game) takeDamageFromTrapMessage(damage float32, attackerName string, defender *Character.NPC) {
-	fmt.Printf("%s strikes %s for %f points of damage.\n", attackerName, defender.Name,
-						 damage)
+	fmt.Printf("%s strikes %s for %v points of damage.\n", attackerName, defender.Name,
+						 int(damage))
 	time.Sleep(2000 * time.Millisecond)
 }
 
 func (game *Game) takeDamageMessage(damage float32, attacker *Character.NPC, defender *Character.NPC) {
-	fmt.Printf("%s strikes %s for %f points of damage. %s has %f HP left\n", attacker.Name, defender.Name,
-						 damage,defender.Name, defender.CurrentHealth)
+	fmt.Printf("%s strikes %s for %v points of damage. %s has %v HP left\n", attacker.Name, defender.Name,
+						 int(damage),defender.Name, int(defender.CurrentHealth))
 	time.Sleep(2000 * time.Millisecond)
 }
 
@@ -396,6 +396,7 @@ func (game *Game) openChest() {
 		weapon := game.createWeapon()
 		game.newWeaponFound(weapon)
 	}
+	game.chestsLooted++
 }
 
 func (game *Game) exitFound() {
@@ -632,10 +633,20 @@ func (game *Game) drawLabyrinth() {
 	}
 }
 
+func (game *Game) drawHeroStats(hero *Character.NPC) {
+	fmt.Printf("HP: %v\\%v\tMP: %v\\%v\n", int(hero.CurrentHealth), hero.MaxHealth, int(hero.CurrentMana), hero.MaxMana)
+	fmt.Printf("HP Regen: %v\tMP Regen: %v\n", int(hero.HealthRegen), int(hero.ManaRegen))
+	damageMin := hero.DmgMultuplier * float32((hero.Weapon.MinDmg + hero.Weapon.BonusDmg))
+	damageMax := hero.DmgMultuplier * float32((hero.Weapon.MaxDmg + hero.Weapon.BonusDmg))
+	fmt.Printf("DMG: %v - %v\tDef:%v\n", int(damageMin), int(damageMax), int(hero.CombinedDefence()))
+	fmt.Printf("Evs:%v\t\tCrit:%v\n", hero.Evasion, hero.CritChance)
+}
+
 func (game *Game) draw() {
 	game.clearScreen()
 	game.drawCharacters()
 	game.drawLabyrinth()
+	game.drawHeroStats(game.player.Base)
 }
 
 func (game *Game) detectKeyPress() string{
