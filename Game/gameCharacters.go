@@ -1,3 +1,4 @@
+//Handles the logic in the game.
 package Game
 
 import "github.com/golang/The-Lagorinth/Labyrinth"
@@ -8,7 +9,7 @@ import "os"
 import "bufio"
 import "strings"
 
-//function takes user input and send it to PlayerActionEvent
+//playerAction determines what event follows depending on the key pressed.
 func (game *Game) playerAction() {
 	if !game.player.Base.IsStunned {
 		key := game.detectKeyPress()
@@ -60,7 +61,7 @@ func (game *Game) playerAction() {
 	game.player.MemorizeLabyrinth(game.labyrinth, game.player.Base.Location)
 }
 
-// //given a user input the function handles the desired action the player wants to performe
+//plyerActionEvent determines what event follows depending on the tile ahead.
 func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
 	if x >= 0 && y >=0 && x < 40 && y < 40 {
 		switch game.labyrinth.Labyrinth[x][y] {
@@ -111,6 +112,9 @@ func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
 	}
 }
 
+//characterMoveTo handles updating the character coordinates when he moves.
+//Changing the way he is facing.
+//Drawing the character symbol on the tile ahead and restoring the tile he was on.
 func (game *Game) characterMoveTo(character *Character.NPC, x int, y int) {
 	game.restoreTile(character.Location.X, character.Location.Y)
 	character.ChangeOrientation(x, y)
@@ -119,7 +123,8 @@ func (game *Game) characterMoveTo(character *Character.NPC, x int, y int) {
 	game.replaceTile(character.Location.X, character.Location.Y, character.Symbol)
 }
 
-func (game *Game) defeate(character *Character.NPC, place int) {
+//defeat handles the event when a character is defeated in battle.
+func (game *Game) defeat(character *Character.NPC, place int) {
 	if game.isCharacterDefeted(character) {
 		if !character.IsHuman {
 			game.monsterDefetedMessage(character.Name, game.player.Base.Name)
@@ -129,7 +134,7 @@ func (game *Game) defeate(character *Character.NPC, place int) {
 	}
 }
 
-//this function will handle the fight event
+//fight handles the event of 2 characters fighting.
 func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
 	character.ChangeOrientation(enemyX, enemyY)
 	place, enemy := game.findEnemy(enemyX, enemyY)
@@ -141,9 +146,10 @@ func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
 	enemy.ChangeOrientation(character.Location.X, character.Location.Y)
 	game.takeDamageMessage(damage, character, enemy)
 	}
-	game.defeate(enemy, place)
+	game.defeat(enemy, place)
 }
 
+//lootEnemy handles the precess of acquiring items from defeated foes.
 func (game *Game) lootEnemy(character *Character.NPC) {
 	weapon := character.Weapon
 	character.UnequipWeapon()
@@ -153,6 +159,7 @@ func (game *Game) lootEnemy(character *Character.NPC) {
 	game.newWeaponFound(weapon)
 }
 
+//newArmorFound handles the event when a new armor has been found. 
 func (game *Game) newArmorFound(found *Items.Armor) {
 	game.clearScreen()
 	game.compareArmor(game.player.Base.Armor, found)
@@ -163,6 +170,7 @@ func (game *Game) newArmorFound(found *Items.Armor) {
 	}
 }
 
+//newWeaponFound handles the event when a new weapon has been found. 
 func (game *Game) newWeaponFound(found *Items.Weapon) {
 	game.clearScreen()
 	game.compareWeapon(game.player.Base.Weapon, found)
@@ -173,6 +181,7 @@ func (game *Game) newWeaponFound(found *Items.Weapon) {
 	}
 }
 
+//openChest handles the event of encountering a treasure tile.
 func (game *Game) openChest() {
 	if rand.Intn(2) == 0 {
 		armor := game.createArmor()
@@ -184,16 +193,19 @@ func (game *Game) openChest() {
 	game.chestsLooted++
 }
 
+//exitFound handles the event of encountering the exit tile.
 func (game *Game) exitFound() {
 	game.gameCompleted = true
 }
 
+//detectKeyPress return a string of the information entered via the keyboard.
 func (game *Game) detectKeyPress() string{
 	reader := bufio.NewReader(os.Stdin)
 	key, _ := reader.ReadString('\n')
 	return strings.Trim(key,"\r\n")
 }
 
+//applyRegenToAll calls the Regen function on every character.
 func (game *Game) applyRegenToAll() {
 	game.player.Base.Regenerate()
 	for _, monster := range game.monsterList {
@@ -201,10 +213,12 @@ func (game *Game) applyRegenToAll() {
 	}
 }
 
+//isCharacterDefeted return true if a characters health point drop below 0.
 func (game *Game) isCharacterDefeted(character *Character.NPC) bool {
 	return character.CurrentHealth < 0
 }
 
+//CharacterDefeted handles the event when a character has been defeated.
 func (game *Game) CharacterDefeted(character *Character.NPC, place int) {
 	switch true {
 	case place == -1:
@@ -217,12 +231,14 @@ func (game *Game) CharacterDefeted(character *Character.NPC, place int) {
 	}
 }
 
+//checkForDefeatedCharacters check if characters' health points have dropped below 0 from damage over time.
 func (game *Game) checkForDefeatedCharacters() {
 	for place, monster := range game.monsterList {
-		game.defeate(monster, place)
+		game.defeat(monster, place)
 	}
 }
 
+//moveMonsters calls the Move function for every character and the function to determine the following event.
 func (game *Game) moveMonsters() {
 	game.checkForDefeatedCharacters()
 	for _, monster := range game.monsterList {
@@ -235,12 +251,14 @@ func (game *Game) moveMonsters() {
 	}
 }
 
+//npcsTurn call function responsible for spell and monster movement, and for triggered traps.
 func (game *Game) npcsTurn() {
 	game.activateSpells()
 	game.checkTraps()
 	game.moveMonsters()
 }
 
+//findEnemy return a character and his number in the list.
 func (game *Game) findEnemy(requiredX int, requiredY int) (int, *Character.NPC) {
 	if game.player.Base.Location.X == requiredX && game.player.Base.Location.Y == requiredY {
 		return -1, game.player.Base
@@ -253,6 +271,7 @@ func (game *Game) findEnemy(requiredX int, requiredY int) (int, *Character.NPC) 
  	return -2, &Character.NPC{}
 }
 
+//removeMonster removes a character from the character list.
 func (game *Game) removeMonster(place int) {
 	game.monsterList = append(game.monsterList[:place], game.monsterList[place +1:]...)
 }

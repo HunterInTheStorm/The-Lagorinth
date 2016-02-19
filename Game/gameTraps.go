@@ -1,3 +1,4 @@
+//Handles the logic in the game.
 package Game
 
 import "github.com/golang/The-Lagorinth/Labyrinth"
@@ -7,7 +8,7 @@ import "time"
 import "fmt"
 import "math/rand"
 
-
+//triggerDamageTrap handles the event when a character steps on a damage trap.
 func (game *Game) triggerDamageTrap(trap *Character.Trap, character *Character.NPC) {
 	damage := trap.DamageTrap()
 	if rand.Intn(100) < character.Evasion {
@@ -21,6 +22,7 @@ func (game *Game) triggerDamageTrap(trap *Character.Trap, character *Character.N
 	}
 }
 
+//findEmptyTile receives 2 coordinates and find the nearest empty tile next to them.
 func (game *Game) findEmptyTile(centerX int, centerY int) Point.Point{
 	for e := 0; true; e++ {
 		for i := centerX - 1 - e; i <= centerX + 1 + e; i++ {
@@ -34,17 +36,20 @@ func (game *Game) findEmptyTile(centerX int, centerY int) Point.Point{
 	return Point.Point{}
 }
 
+//triggerTabulaRasaTrap handles the event when a character steps on a trap.
 func (game *Game) triggerTabulaRasaTrap(trap *Character.Trap, hero *Character.Hero) {
 	game.triggerMemoryWhipeTrap(trap, hero)
 	game.triggerTeleportTrap(trap, hero.Base)
 }
 
+//triggerMemoryWhipeTrap handles the event when a character steps on a trap.
 func (game *Game) triggerMemoryWhipeTrap(trap *Character.Trap, hero *Character.Hero) {
 	fmt.Println("MEMORY TRAP")
 	time.Sleep(2000 * time.Millisecond)
 	trap.WhipeMemory(hero)
 }
 
+//triggerTeleportTrap handles the event when a character steps on a teleportation trap.
 func (game *Game) triggerTeleportTrap(trap *Character.Trap, character *Character.NPC) {
 	fmt.Println("TELEPORT TRAP")
 	time.Sleep(2000 * time.Millisecond)
@@ -60,6 +65,7 @@ func (game *Game) triggerTeleportTrap(trap *Character.Trap, character *Character
 	game.cameraReset()
 }
 
+//triggerSpawnTrap handles the event when a character steps on a trap that spawn new monsters.
 func (game *Game) triggerSpawnTrap(trap *Character.Trap) {
 	fmt.Println("SPAWNTRAP ACTIVATED")
 	time.Sleep(2000 * time.Millisecond)
@@ -76,6 +82,7 @@ func (game *Game) triggerSpawnTrap(trap *Character.Trap) {
 	time.Sleep(2000 * time.Millisecond)
 }
 
+//triggerTrap determines the type of the trap that the character steps on and the event that follows.
 func (game *Game) triggerTrap(trap *Character.Trap, character *Character.Hero) {
 	switch trap.TrapType {
 	case Character.TrapTypes[0]:
@@ -97,12 +104,14 @@ func (game *Game) triggerTrap(trap *Character.Trap, character *Character.Hero) {
 	}
 }
 
+//checkTraps if a trap has been triggered,
 func (game *Game) checkTraps() {
 	if trap, ok := game.isTrapTriggered(game.player.Base) ; ok {
 		game.triggerTrap(trap, game.player)
 	}
 }
 
+//isTrapTriggered checks if a trap is triggered by the player.
 func (game *Game) isTrapTriggered(character *Character.NPC) (*Character.Trap, bool) {
 	if trap, ok := game.trapList[Point.Point{character.Location.X, character.Location.Y, nil}]; ok {
     	return trap, true
@@ -110,15 +119,18 @@ func (game *Game) isTrapTriggered(character *Character.NPC) (*Character.Trap, bo
 	return &Character.Trap{}, false
 }
 
+//removeTrap removes a trap from the list of traps.
 func (game *Game) removeTrap(trap *Character.Trap) {
 	game.restoreTile(trap.Location.X, trap.Location.Y)
 	delete(game.trapList, *trap.Location)
 }
 
+//calculateOddsVsTraps calculates the odd of a character detecting and disarming traps.
 func (game *Game) calculateOddsVsTraps(difficulty int, trapHandlingSkill int) int {
 	return 100 - difficulty * 10 + trapHandlingSkill * 5
 }
 
+//attempDisarmTrap determines if a trap is successfully disarmed by randomness.
 func (game *Game) attempDisarmTrap(trap *Character.Trap, character *Character.NPC) {
 	chance := game.calculateOddsVsTraps(trap.DisarmDifficulty, character.TrapHandling)
 	if rand.Intn(100) < chance {
@@ -135,6 +147,7 @@ func (game *Game) attempDisarmTrap(trap *Character.Trap, character *Character.NP
 	}
 }
 
+//attempDetectTrap determines if a trap is successfully detected by randomness.
 func (game *Game) attempDetectTrap(trap *Character.Trap, character *Character.NPC) {
 	chance := game.calculateOddsVsTraps(trap.DetectDifficulty, character.TrapHandling)
 	if rand.Intn(100) < chance {
@@ -149,6 +162,7 @@ func (game *Game) attempDetectTrap(trap *Character.Trap, character *Character.NP
 	}
 }
 
+//encounterTrap handles the interaction event between the player and a detected trap.
 func (game *Game) encounterTrap(character *Character.NPC, x int, y int) {
 	trap := game.trapList[Point.Point{x, y, nil}]
 	if trap.CanBeDetected && !trap.IsDetected {

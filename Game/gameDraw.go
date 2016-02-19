@@ -1,3 +1,4 @@
+//Handles the logic in the game.
 package Game
 
 import "github.com/golang/The-Lagorinth/Labyrinth"
@@ -7,6 +8,7 @@ import "fmt"
 import "os"
 import "os/exec"
 
+//draw calls all function responsible for drawing objects in the game.
 func (game *Game) draw() {
 	game.clearScreen()
 	game.drawCharacters()
@@ -14,7 +16,7 @@ func (game *Game) draw() {
 	game.drawHeroStats(game.player.Base)
 }
 
-// //function replaces an element fro the 2d array for the maze with the character symbol
+//drawCharacters call function responsible for drawing characters, traps and projectiles.
 func (game *Game) drawCharacters() {
 	game.drawTraps()
 	game.drawHero()
@@ -22,7 +24,7 @@ func (game *Game) drawCharacters() {
 	game.drawMonsters()
 }
 
-//function to draw the labyrinth
+//drawLabyrinth drawn the labyrinth.
 func (game *Game) drawLabyrinth() {
 	var maxX int = game.camera.X + game.cameraRadius
 	var minX int = game.camera.X - game.cameraRadius
@@ -53,6 +55,7 @@ func (game *Game) drawLabyrinth() {
 	}
 }
 
+//drawHeroStats draws the hero's stats - HP, MP, damage ect.
 func (game *Game) drawHeroStats(hero *Character.NPC) {
 	fmt.Printf("HP: %v\\%v\tMP: %v\\%v\n", int(hero.CurrentHealth), hero.MaxHealth, int(hero.CurrentMana), hero.MaxMana)
 	fmt.Printf("HP Regen: %v\tMP Regen: %v\n", int(hero.HealthRegen), int(hero.ManaRegen))
@@ -62,34 +65,41 @@ func (game *Game) drawHeroStats(hero *Character.NPC) {
 	fmt.Printf("Evs:%v\t\tCrit:%v\n", hero.Evasion, hero.CritChance)
 }
 
+//drawTraps is responsible for the correct drawing of traps.
 func (game *Game) drawTraps() {
 	for trapPoint, _ := range game.trapList {
 		game.labyrinth.Labyrinth[trapPoint.X][trapPoint.Y] = Labyrinth.Trap
 	}
 }
 
+//drawMonsters is responsible for the correct drawing of characters.
 func (game *Game) drawMonsters() {
 	for _, mon := range game.monsterList {
 		game.labyrinth.Labyrinth[mon.Location.X][mon.Location.Y] = mon.Symbol
 	}
 }
 
+//drawProjectiles is responsible for the correct drawing of projectiles.
 func (game *Game) drawProjectiles() {
 	for _, projectile := range game.projectileList {
 		game.labyrinth.Labyrinth[projectile.Location.X][projectile.Location.Y] = projectile.Symbol
 	}
 }
 
+//drawHero is responsible for the correct drawing of the hero.
 func (game *Game) drawHero() {
 	game.labyrinth.Labyrinth[game.player.Base.Location.X][game.player.Base.Location.Y] = Labyrinth.CharSymbol
 }
 
+//clearScreen clears the screen.
 func (game *Game) clearScreen() {
 	c := exec.Command("cmd", "/c", "cls")
 	c.Stdout = os.Stdout
 	c.Run()
 }
 
+//restoreTile replaces the current symbol of a tile with a symbol for an empty tile.
+//Drawn the start and exit point.
 func (game *Game) restoreTile(x int, y int) {
 	game.labyrinth.Labyrinth[x][y] = Labyrinth.Pass
 	if game.start.X != game.player.Base.Location.X || game.start.Y != game.player.Base.Location.Y {
@@ -100,6 +110,7 @@ func (game *Game) restoreTile(x int, y int) {
 	}
 }
 
+//replaceTile replaces a tile if it is not a wall with another symbol.
 func(game *Game) replaceTile(x int, y int, symbol string) {
 	if game.labyrinth.Labyrinth[x][y] != Labyrinth.Wall {
 		game.labyrinth.Labyrinth[x][y] = symbol

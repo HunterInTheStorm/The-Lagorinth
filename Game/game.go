@@ -1,3 +1,4 @@
+//Handles the logic in the game.
 package Game
 
 import "github.com/golang/The-Lagorinth/Labyrinth"
@@ -40,7 +41,7 @@ type Game struct {
 // }
 
 
-//main loop cycle for the game
+//Run is the game's main loop cycle
 func (game *Game) Run() {
 	game.initialize()
 

@@ -1,3 +1,4 @@
+//Handles the logic in the game.
 package Game
 
 import "github.com/golang/The-Lagorinth/Labyrinth"
@@ -5,6 +6,8 @@ import "github.com/golang/The-Lagorinth/Spells"
 import "github.com/golang/The-Lagorinth/Characters"
 import "math/rand"
 
+
+//manageSpells handles lowering the cool down on spells and the duration of buffs.
 func (game *Game) manageSpells(){
 	game.lowerCoolDownOnSpells()
 	game.lowerCharacterBuffDuration(game.player.Base)
@@ -13,6 +16,7 @@ func (game *Game) manageSpells(){
 	}
 }
 
+//lowerCharacterBuffDuration lower the duration of a character's buff.
 func (game *Game) lowerCharacterBuffDuration(character *Character.NPC) {
 	for _, buff := range character.BuffList {
 		if buff.Duration > 0 {
@@ -27,12 +31,14 @@ func (game *Game) lowerCharacterBuffDuration(character *Character.NPC) {
 	}
 }
 
+//lowerCoolDownOnSpells lowers the cool down on spells.
 func (game *Game) lowerCoolDownOnSpells() {
 	for _, spell := range game.player.SpellList {
 		spell.LowerCoolDownTime()
 	}
 }
 
+//projectileActionEvent handles the interaction between projectiles and the surrounding world.
 func (game *Game) projectileActionEvent(x int, y int, projectile *Spell.Projectile, place int) {
 	switch game.labyrinth.Labyrinth[x][y] {
 	case Labyrinth.Pass:
@@ -66,6 +72,7 @@ func (game *Game) projectileActionEvent(x int, y int, projectile *Spell.Projecti
 	}
 }
 
+//activateSpells determines where the projectile will move and call projectileActionEvent function.
 func (game *Game) activateSpells() {
 	for place, projectile := range game.projectileList {
 		x := projectile.Location.X + projectile.Vector.X
@@ -74,12 +81,14 @@ func (game *Game) activateSpells() {
 	}
 }
 
+//projectileMoveTo moves the projectile forward, deleting is symbol from it's previous tile and placing it on its new one.
 func (game *Game) projectileMoveTo(projectile *Spell.Projectile, x int, y int) {
 	game.restoreTile(projectile.Location.X, projectile.Location.Y)
 	projectile.Move()
 	game.replaceTile(projectile.Location.X, projectile.Location.Y, projectile.Symbol)
 }
 
+//projectileHitsCharacter handles the event when a projectile hits a character.
 func (game *Game) projectileHitsCharacter(x int, y int, projectile *Spell.Projectile) {
 	place, enemy := game.findEnemy(x, y)
 	enemy.ProjectileToTheFace(projectile)
@@ -95,10 +104,12 @@ func (game *Game) projectileHitsCharacter(x int, y int, projectile *Spell.Projec
 	}
 }
 
+//removeProjectile removes a projectile from the list of projectiles.
 func (game *Game) removeProjectile(place int) {
 	game.projectileList = append(game.projectileList[:place], game.projectileList[place +1:]...)
 }
 
+//findProjectile find a projectile in the list given a set of coordinates.
 func (game *Game) findProjectile(x int, y int) int {
 	for place, projectile := range game.projectileList {
 		if x == projectile.Location.X && y == projectile.Location.Y {
@@ -108,6 +119,7 @@ func (game *Game) findProjectile(x int, y int) int {
 	return -1
 }
 
+//useSpell determines the type of the spell cast and call appropriate functions. 
 func (game *Game) useSpell(spell *Spell.Spell, hero *Character.Hero) {
 	if spell.ManaCost < hero.Base.CurrentMana {
 		if !spell.IsOnCoolDown {
