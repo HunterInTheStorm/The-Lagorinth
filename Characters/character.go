@@ -39,7 +39,7 @@ func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
 	spell3 := Spell.PaladinSpellHolyBolt(&location)
 	spellList = append(spellList, spell3)
 	memory := make(map[Point.Point]int)
-	var memoryDuration int = 17
+	var memoryDuration int = 30
 
 	base := NPC{&location, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
@@ -54,20 +54,20 @@ func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
 func CreateMage(charName string, charBackGround string, x int, y int) *Hero {
 	//NPC
 	location := Point.Point{x, y, nil}
-	var dmgMultuplier float32= 1.2
-	var defence int = 6 
-	var evasion int = 3
-	var critChance int = 15
-	var maxHealth float32 = 200.0
-	var healthRegen float32 = 3.6
-	var maxMana float32 = 75.0
-	var manaRegen float32 = 1.9
-	var visionRadious int = 4
-	var trapHandling int = 3
+	var dmgMultuplier float32= 6.0
+	var defence int = 4 
+	var evasion int = 6
+	var critChance int = 20
+	var maxHealth float32 = 150.0
+	var healthRegen float32 = 2.0
+	var maxMana float32 = 200
+	var manaRegen float32 = 5.0
+	var visionRadious int = 5
+	var trapHandling int = 5
 	//Character
 	// SpellLList []Spells.Spell
 	memory := make(map[Point.Point]int)
-	var memoryDuration int = 12
+	var memoryDuration int = 45
 
 	base := NPC{&location, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
@@ -84,21 +84,21 @@ func CreateRouge(charName string, charBackGround string, x int, y int) *Hero {
 	//ROUGE
 	//NPC
 	location := Point.Point{x, y, nil}
-	var dmgMultuplier float32 = 1.2
-	var defence int = 6 
-	var evasion int = 3
-	var critChance int = 15
-	var maxHealth float32 = 200.0
-	var healthRegen float32 = 3.6
-	var maxMana float32 = 75.0
-	var manaRegen float32 = 1.9
+	var dmgMultuplier float32 = 7.5
+	var defence int = 5 
+	var evasion int = 10
+	var critChance int = 25
+	var maxHealth float32 = 175.0
+	var healthRegen float32 = 2.0
+	var maxMana float32 = 150.0
+	var manaRegen float32 = 2.5
 	var visionRadious int = 5
 	var trapHandling int = 6
 
 	//Character
 	// SpellLList []Spells.Spell
 	memory := make(map[Point.Point]int)
-	var memoryDuration int = 10
+	var memoryDuration int = 30
 
 
 	base := NPC{&location, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
@@ -203,19 +203,34 @@ type NPC struct {
 }
 
 func (npc *NPC) moveTowardsHero(labyrinth *Labyrinth.Labyrinth) (bool, *Point.Point) {
-	upTile :=	labyrinth.Labyrinth[npc.Location.X - 1][npc.Location.Y]
+	var upTile string
+	if labyrinth.IsInBondaries(npc.Location.X - 1, npc.Location.Y) {
+		upTile = labyrinth.Labyrinth[npc.Location.X - 1][npc.Location.Y]
+	}
 	if upTile == Labyrinth.CharSymbol {
 		return true, &Point.Point{npc.Location.X - 1, npc.Location.Y, nil}
 	}
-	downTile := labyrinth.Labyrinth[npc.Location.X + 1][npc.Location.Y]
+
+	var downTile string
+	if labyrinth.IsInBondaries(npc.Location.X + 1, npc.Location.Y) {
+		downTile =	labyrinth.Labyrinth[npc.Location.X + 1][npc.Location.Y]
+	}
 	if downTile == Labyrinth.CharSymbol {
 		return true, &Point.Point{npc.Location.X + 1, npc.Location.Y, nil}
 	}
-	leftTile := labyrinth.Labyrinth[npc.Location.X][npc.Location.Y - 1]
+
+	var leftTile string
+	if labyrinth.IsInBondaries(npc.Location.X, npc.Location.Y - 1) {
+		leftTile =	labyrinth.Labyrinth[npc.Location.X][npc.Location.Y - 1]
+	}
 	if leftTile == Labyrinth.CharSymbol {
 		return true, &Point.Point{npc.Location.X, npc.Location.Y - 1, nil}
 	}
-	rightTile := labyrinth.Labyrinth[npc.Location.X][npc.Location.Y + 1]
+
+	var rightTile string
+	if labyrinth.IsInBondaries(npc.Location.X, npc.Location.Y + 1) {
+		rightTile =	labyrinth.Labyrinth[npc.Location.X][npc.Location.Y + 1]
+	}
 	if rightTile == Labyrinth.CharSymbol {
 		return true, &Point.Point{npc.Location.X, npc.Location.Y + 1, nil}
 	}
@@ -371,6 +386,13 @@ func (npc *NPC) Regenerate() {
 	npc.RegenHealth()
 }
 
+func (npc *NPC) ProjectileToTheFace(projectile *Spell.Projectile) {
+	npc.IsStunned = projectile.WillStun
+	if projectile.Buff != nil {
+		npc.ApplyBuff(projectile.Buff)
+	}
+}
+
 type Hero struct {
 	Base *NPC
 	ClassName string
@@ -434,10 +456,14 @@ func (hero *Hero) UseBuffSpell(spell *Spell.Spell) {
 	}
 }
 
-// //a spell from the list of targetble spells will be envoked
-// func (hero *Hero) UseProjectileSpell() Projectile {
 
-// }
+
+// //a spell from the list of targetble spells will be envoked
+func (hero *Hero) UseProjectileSpell(spell *Spell.Spell) *Spell.Projectile {
+	crit := hero.Base.CritChance + hero.Base.Weapon.BonusCritChance
+	hero.Base.CurrentMana -= spell.ManaCost
+	return spell.CreateProjectile(hero.Base.Orientation, crit)
+}
 
 // func (hero *Hero) UseAreaOfEffectSpell() Effect {
 

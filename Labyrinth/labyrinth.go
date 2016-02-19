@@ -22,6 +22,7 @@ var Monster string = "i"
 var CharSymbol string = "c"
 var ExitPosition string = "E"
 var StartPosition string = "S"
+var Projectile string = "o"
 var pointMap = map[Point.Point]bool{}
 var chanceToBeTreasure int = 25
 var chanceToBeTrap int = 10

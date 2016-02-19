@@ -30,6 +30,7 @@ type Game struct {
 	player *Character.Hero
 	camera *Point.Point
 	cameraRadius int
+	projectileList []*Spell.Projectile
 }
 
 func (game *Game) useInstantSpellMessage(spell *Spell.Spell, hero *Character.Hero) {
@@ -78,7 +79,9 @@ func (game *Game) useSpell(spell *Spell.Spell, hero *Character.Hero) {
 				game.useBuffSpellMessage(spell, hero)
 				spell.GoOnCoolDown()
 			} else if spell.IsProjectile {
-				// asd
+				projectile := hero.UseProjectileSpell(spell)
+				game.projectileList = append(game.projectileList, projectile)
+				spell.GoOnCoolDown()
 			} else if spell.IsAreaOfEffect {
 				// asfd
 			}
@@ -349,53 +352,56 @@ func (game *Game) characterMoveTo(character *Character.NPC, x int, y int) {
 	character.ChangeOrientation(x, y)
 	character.Location.X = x
 	character.Location.Y = y
+	game.replaceTile(character.Location.X, character.Location.Y, character.Symbol)
 }
 
 // //given a user input the function handles the desired action the player wants to performe
 func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
-	switch game.labyrinth.Labyrinth[x][y] {
-	case Labyrinth.Pass:
-		if character.IsHuman {
-			game.characterMoveTo(character, x, y)
-			game.drawHero()
-		} else {
-			game.characterMoveTo(character, x, y)
-		}
-	case Labyrinth.StartPosition:
-		if character.IsHuman {
-			game.characterMoveTo(character, x, y)
-			game.drawHero()
-		} else {
-			game.characterMoveTo(character, x, y)
-		}
-	case Labyrinth.Monster:
-		if character.IsHuman {
-			game.fight(character, x, y)
-		}
-	case Labyrinth.CharSymbol:
-		if !character.IsHuman {
-			game.draw()
-			game.fight(character, x, y)
-		}
-	case Labyrinth.Trap:
-		if character.IsHuman {
-			game.encounterTrap(character, x, y)
-		} else {
-			game.characterMoveTo(character, x, y)
-			game.drawHero()
-		}
-	case Labyrinth.Treasure:
-		if character.IsHuman {
-			game.openChest()
-			game.characterMoveTo(character, x, y)
-		}
-	case Labyrinth.ExitPosition:
-		if character.IsHuman {
-			game.exitFound()
-			game.characterMoveTo(character, x, y)
-			game.drawHero()
-		} else {
-			game.characterMoveTo(character, x, y)
+	if x >= 0 && y >=0 && x < 40 && y < 40 {
+		switch game.labyrinth.Labyrinth[x][y] {
+		case Labyrinth.Pass:
+			if character.IsHuman {
+				game.characterMoveTo(character, x, y)
+				game.drawHero()
+			} else {
+				game.characterMoveTo(character, x, y)
+			}
+		case Labyrinth.StartPosition:
+			if character.IsHuman {
+				game.characterMoveTo(character, x, y)
+				game.drawHero()
+			} else {
+				game.characterMoveTo(character, x, y)
+			}
+		case Labyrinth.Monster:
+			if character.IsHuman {
+				game.fight(character, x, y)
+			}
+		case Labyrinth.CharSymbol:
+			if !character.IsHuman {
+				game.draw()
+				game.fight(character, x, y)
+			}
+		case Labyrinth.Trap:
+			if character.IsHuman {
+				game.encounterTrap(character, x, y)
+			} else {
+				game.characterMoveTo(character, x, y)
+				game.drawHero()
+			}
+		case Labyrinth.Treasure:
+			if character.IsHuman {
+				game.openChest()
+				game.characterMoveTo(character, x, y)
+			}
+		case Labyrinth.ExitPosition:
+			if character.IsHuman {
+				game.exitFound()
+				game.characterMoveTo(character, x, y)
+				game.drawHero()
+			} else {
+				game.characterMoveTo(character, x, y)
+			}
 		}
 	}
 }
@@ -470,50 +476,60 @@ func (game *Game) restoreTile(x int, y int) {
 	}
 }
 
+func(game *Game) replaceTile(x int, y int, symbol string) {
+	if game.labyrinth.Labyrinth[x][y] != Labyrinth.Wall {
+		game.labyrinth.Labyrinth[x][y] = symbol
+	}
+}
+
 //function takes user input and send it to PlayerActionEvent
 func (game *Game) playerAction() {
-	key := game.detectKeyPress()
-	switch key {
-	case "w":
-		game.plyerActionEvent(game.player.Base.Location.X - 1, game.player.Base.Location.Y, game.player.Base)
-		game.cameraReset()
-	case "a":
-		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y - 1, game.player.Base)
-		game.cameraReset()
-	case "s":
-		game.plyerActionEvent(game.player.Base.Location.X + 1, game.player.Base.Location.Y, game.player.Base)
-		game.cameraReset()
-	case "d":
-		game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y + 1, game.player.Base)
-		game.cameraReset()
-	case "exit":
-		game.playerDefeted = true
-	case "1":
-		game.useSpell(game.player.SpellList[0], game.player)
-	case "2":
-		game.useSpell(game.player.SpellList[1], game.player)
-	case "3":
-		game.useSpell(game.player.SpellList[2], game.player)
-	case "4":
-		game.cameraMoveLeft()
-		game.draw()
-		game.playerAction()
-	case "5":
-		game.cameraMoveDown()
-		game.draw()
-		game.playerAction()
-	case "6":
-		game.cameraMoveRight()
-		game.draw()
-		game.playerAction()
-	case "8":
-		game.cameraMoveUp()
-		game.draw()
-		game.playerAction()
-	case "home":
-		game.cameraReset()
-		game.draw()
-		game.playerAction()
+	if !game.player.Base.IsStunned {
+		key := game.detectKeyPress()
+		switch key {
+		case "w":
+			game.plyerActionEvent(game.player.Base.Location.X - 1, game.player.Base.Location.Y, game.player.Base)
+			game.cameraReset()
+		case "a":
+			game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y - 1, game.player.Base)
+			game.cameraReset()
+		case "s":
+			game.plyerActionEvent(game.player.Base.Location.X + 1, game.player.Base.Location.Y, game.player.Base)
+			game.cameraReset()
+		case "d":
+			game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y + 1, game.player.Base)
+			game.cameraReset()
+		case "exit":
+			game.playerDefeted = true
+		case "1":
+			game.useSpell(game.player.SpellList[0], game.player)
+		case "2":
+			game.useSpell(game.player.SpellList[1], game.player)
+		case "3":
+			game.useSpell(game.player.SpellList[2], game.player)
+		case "4":
+			game.cameraMoveLeft()
+			game.draw()
+			game.playerAction()
+		case "5":
+			game.cameraMoveDown()
+			game.draw()
+			game.playerAction()
+		case "6":
+			game.cameraMoveRight()
+			game.draw()
+			game.playerAction()
+		case "8":
+			game.cameraMoveUp()
+			game.draw()
+			game.playerAction()
+		case "home":
+			game.cameraReset()
+			game.draw()
+			game.playerAction()
+		}
+	} else {
+		game.player.Base.IsStunned = false
 	}
 	game.player.MemorizeLabyrinth(game.labyrinth, game.player.Base.Location)
 }
@@ -582,12 +598,14 @@ func (game *Game) createTrap(x int, y int) Character.Trap{
 func (game *Game) setGameFieldValues() {
 	game.playerDefeted = false
 	game.gameCompleted = false
-	game.score = 0
+	game.score = 1000
 	game.turns = 0
 	game.monsterSlain = 0
 	game.chestsLooted = 0
 	game.trapsDisarmed = 0
-	game.cameraRadius = 8
+	game.cameraRadius = 12
+	game.projectileList = make([]*Spell.Projectile, 0, 8)
+
 }
 
 func (game *Game) createLabyrinth() {
@@ -651,11 +669,18 @@ func (game *Game) drawMonsters() {
 		game.labyrinth.Labyrinth[mon.Location.X][mon.Location.Y] = mon.Symbol
 	}
 }
+
+func (game *Game) drawProjectiles() {
+	for _, projectile := range game.projectileList {
+		game.labyrinth.Labyrinth[projectile.Location.X][projectile.Location.Y] = projectile.Symbol
+	}
+}
+
 // //function replaces an element fro the 2d array for the maze with the character symbol
 func (game *Game) drawCharacters() {
 	game.drawTraps()
 	game.drawHero()
-	//add projectile here
+	game.drawProjectiles()
 	game.drawMonsters()
 }
 
@@ -724,7 +749,6 @@ func (game *Game) triggerDamageTrap(trap *Character.Trap, character *Character.N
 		game.CharacterDefeted(character, -1)
 	}
 }
-
 
 func (game *Game) findEmptyTile(centerX int, centerY int) Point.Point{
 	for e := 0; true; e++ {
@@ -810,13 +834,103 @@ func (game *Game) checkTraps() {
 
 func (game *Game) moveMonsters() {
 	for _, monster := range game.monsterList {
-		location := monster.Move(game.labyrinth)
-		game.plyerActionEvent(location.X, location.Y, monster)
+		if !monster.IsStunned {
+			location := monster.Move(game.labyrinth)
+			game.plyerActionEvent(location.X, location.Y, monster)
+		} else {
+			monster.IsStunned = false
+		}
+	}
+}
+
+func (game *Game) removeProjectile(place int) {
+	game.projectileList = append(game.projectileList[:place], game.projectileList[place +1:]...)
+}
+
+func (game *Game) findProjectile(x int, y int) int {
+	for place, projectile := range game.projectileList {
+		if x == projectile.Location.X && y == projectile.Location.Y {
+			return place
+		}
+	}
+	return -1
+}
+
+func (game *Game) takeSpellDamageMessage(damage float32, character *Character.NPC) {
+	fmt.Printf("%s is hit for %v spell damage", character.Name, int(damage))
+	time.Sleep(2000 * time.Millisecond)
+}
+
+func (game *Game) avoidSpellMessage(character *Character.NPC) {
+	fmt.Printf("%s dodges spell", character.Name)
+	time.Sleep(2000 * time.Millisecond)
+}
+
+func (game *Game) projectileHitsCharacter(x int, y int, projectile *Spell.Projectile) {
+	place, enemy := game.findEnemy(x, y)
+	enemy.ProjectileToTheFace(projectile)
+	damage := projectile.DoDamage()
+	if rand.Intn(100) < enemy.Evasion {
+		game.avoidSpellMessage(enemy)
+	} else {
+	enemy.TakeDamage(damage)
+	game.takeSpellDamageMessage(damage, enemy)
+	}
+	if game.isCharacterDefeted(enemy) {
+		game.CharacterDefeted(enemy, place)
+	}
+}
+
+
+func (game *Game) projectileMoveTo(projectile *Spell.Projectile, x int, y int) {
+	game.restoreTile(projectile.Location.X, projectile.Location.Y)
+	projectile.Move()
+	game.replaceTile(projectile.Location.X, projectile.Location.Y, projectile.Symbol)
+}
+
+func (game *Game) projectileActionEvent(x int, y int, projectile *Spell.Projectile, place int) {
+	switch game.labyrinth.Labyrinth[x][y] {
+	case Labyrinth.Pass:
+		game.projectileMoveTo(projectile, x, y)
+	case Labyrinth.StartPosition:
+		game.projectileMoveTo(projectile, x, y)
+	case Labyrinth.ExitPosition:
+		game.projectileMoveTo(projectile, x, y)
+	case Labyrinth.Trap:
+		game.projectileMoveTo(projectile, x, y)
+	case Labyrinth.Treasure:
+		game.projectileMoveTo(projectile, x, y)
+		projectile.ProjectileImapact(game.labyrinth)
+		game.removeProjectile(place)
+	case Labyrinth.Projectile:
+		spot := game.findProjectile(x, y)
+		game.removeProjectile(place)
+		game.removeProjectile(spot)
+	case Labyrinth.Wall:
+		game.projectileMoveTo(projectile, x, y)
+		projectile.ProjectileImapact(game.labyrinth)
+		game.removeProjectile(place)
+	case Labyrinth.Monster:
+		game.projectileMoveTo(projectile, x, y)
+		game.projectileHitsCharacter(x, y, projectile)
+		game.removeProjectile(place)
+	case Labyrinth.CharSymbol:
+		game.projectileMoveTo(projectile, x, y)
+		game.projectileHitsCharacter(x, y, projectile)
+		game.removeProjectile(place)
+	}
+}
+
+func (game *Game) activateSpells() {
+	for place, projectile := range game.projectileList {
+		x := projectile.Location.X + projectile.Vector.X
+		y := projectile.Location.Y + projectile.Vector.Y
+		game.projectileActionEvent(x, y, projectile, place)
 	}
 }
 
 func (game *Game) npcsTurn() {
-	//spells
+	game.activateSpells()
 	game.checkTraps()
 	game.moveMonsters()
 }
@@ -843,7 +957,7 @@ func (game *Game) lowerCoolDownOnSpells() {
 func (game *Game) lowerCharacterBuffDuration(character *Character.NPC) {
 	for _, buff := range character.BuffList {
 		if buff.Duration > 0 {
-			buff.Duration--	
+			buff.LowerDuration()	
 		} else {
 			character.RemoveBuff(buff)
 			if character.IsHuman {

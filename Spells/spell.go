@@ -1,6 +1,8 @@
 package Spell
 
 import "github.com/golang/The-Lagorinth/Point"
+import "github.com/golang/The-Lagorinth/Labyrinth"
+import "math/rand"
 
 var id int = 0
 
@@ -91,13 +93,13 @@ func PaladinSpellHolyArmor(point *Point.Point) *Spell {
 func PaladinSpellHolyBolt(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point
-	var symbol string = ""
+	var symbol string = Labyrinth.Projectile
 	var spellName string = "Holy Bolt"
 	var isSelfTargeted bool = false
 	var isProjectile bool = true
 	var isAreaOfEffect bool = false
 	var isBuff bool = false
-	var cooldownTime int = 5
+	var cooldownTime int = 3
 	var isOnCoolDown bool = false
 	var coolDownTimeLeft int = 0
 	//instant spell
@@ -118,7 +120,7 @@ func PaladinSpellHolyBolt(point *Point.Point) *Spell {
 	var damage int = 50	
 	var radius int = 0 
 	//Projectile has damage and buff
-	var willStun bool = true
+	var willStun bool = false
 	var canDestroyWall bool = false
 
 	spell := Spell{origin, symbol, spellName, isSelfTargeted, isProjectile, isAreaOfEffect,
@@ -181,24 +183,25 @@ func (spell *Spell) CreateBuff() *Buff {
 	return &buff
 }
 
-// func (spell Spell) CreateBuff(hero *Character) Buff {
-// 	buffName string
-// 	buffID int
-// 	bonusHealthRegen float32
-// 	bonusDamageMultiplier float32
-// 	duration int
-// 	bonusDamage, bonusDefence, bonusEvasion, bonusCritChance int
-// }
+func (spell *Spell) CreateProjectile(vector *Point.Point, critical int) *Projectile {
 
-func (spell *Spell) CreateProjectile() Projectile {
-	// pnt := Point{0,1}
-// 	loaction Point
-// 	vector Point
-// 	willStun, canDestroyWall bool
-// 	critChance int
-// 	damage int
-// 	buff *Buff
-	return Projectile{}
+	var symbol string = spell.Symbol
+	var spellName string = spell.SpellName
+	var location = Point.Point{spell.Origin.X, spell.Origin.Y, nil}
+	var newVector = Point.Point{vector.X, vector.Y, nil}
+	var willStun bool = spell.WillStun 
+	var canDestroyWall bool = spell.CanDestroyWall
+	var critChance int = critical
+	var damage int = spell.Damage
+	var buff *Buff
+	if spell.IsBuff {
+		buff = spell.CreateBuff()
+	} else {
+		buff = &Buff{}
+	}
+	projectile := Projectile{symbol, spellName, location, newVector, willStun, canDestroyWall,
+		critChance, damage, buff}
+	return &projectile
 }
 
 // func (spell Spell) CreateAreaOfEffect(hero *Character) Effect {
@@ -209,33 +212,34 @@ func (spell *Spell) CreateProjectile() Projectile {
 // 	buff *Buff
 // }
 
-// func (spell Spell) InstantSpell(hero *Character) {
-	
-// }
-
-
 type Projectile struct {
-	loaction Point.Point
-	vector Point.Point
-	willStun, canDestroyWall bool
-	critChance int
-	damage int
-	buff *Buff
+	Symbol string
+	SpellName string
+	Location Point.Point
+	Vector Point.Point
+	WillStun, CanDestroyWall bool
+	CritChance int
+	Damage int
+	Buff *Buff
 }
 
-// func (spell Projectile) DoDamage() float32 {
+func (spell Projectile) DoDamage() float32 {
+	if rand.Intn(100) < spell.CritChance {
+		return float32(2 * spell.Damage)
+	}
+	return float32(spell.Damage)
+}
 
-// }
+func (spell *Projectile) Move() {
+	spell.Location.X += spell.Vector.X
+	spell.Location.Y += spell.Vector.Y
+}
 
-// func (spell *Projectile) MoveForward() {
-
-// }
-
-// func (spell Projectile) BuffTarget() {
-
-// }
-
-
+func (spell *Projectile) ProjectileImapact(labyrinth *Labyrinth.Labyrinth) {
+	if spell.CanDestroyWall {
+		labyrinth.Labyrinth[spell.Location.X][spell.Location.Y] = Labyrinth.Pass
+	}
+}
 
 type Effect struct {
 	center Point.Point
@@ -244,16 +248,6 @@ type Effect struct {
 	damage int
 	buff *Buff
 }
-
-// func (spell Effect) EffectCharacter() {
-
-// }
-
-// func (spell Effect) BuffTarget() {
-
-// }
-
-
 
 type Buff struct {
 	BuffName string
@@ -266,14 +260,6 @@ type Buff struct {
 	ManaCostPerTurn float32
 }
 
-// func (buff Buff) ApplyBuff() {
-
-// }
-
-// func (buff Buff) RemoveBuff() {
-
-// }
-
-// func (buff Buff) LowerDuration() {
-
-// }
+func (buff *Buff) LowerDuration() {
+	buff.Duration--
+}
