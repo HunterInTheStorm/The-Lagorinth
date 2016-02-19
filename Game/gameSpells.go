@@ -124,7 +124,6 @@ func (game *Game) useSpell(spell *Spell.Spell, hero *Character.Hero) {
 				game.projectileList = append(game.projectileList, projectile)
 				spell.GoOnCoolDown()
 			} else if spell.IsAreaOfEffect {
-				// asfd
 			}
 		} else {
 			game.spellOnCoolDownMessage(spell)

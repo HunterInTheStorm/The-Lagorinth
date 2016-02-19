@@ -7,13 +7,13 @@ import "time"
 import "fmt"
 
 func (game *Game) playerDefetedMessage() {
-	fmt.Println("Player defeted")
+	fmt.Println("Player defeated")
 	time.Sleep(2000 * time.Millisecond)
 }
 
 // //function will remove a monster from the monster list
 func (game *Game) monsterDefetedMessage(name string, playerName string) {
-	fmt.Println("Player defets monster")
+	fmt.Println("Player defeats monster")
 	time.Sleep(2000 * time.Millisecond)
 }
 
@@ -88,8 +88,8 @@ func (game *Game) lowManaMessage(spell *Spell.Spell) {
 
 func (game *Game) availableBackGroundsMessage() {
 	fmt.Println("And what are you renowned for?")
-	fmt.Println("Giant-like strenght(giant)")
-	fmt.Println("Aagile toreador(toreador)")
+	fmt.Println("Giant-like strength(giant)")
+	fmt.Println("Agile toreador(toreador)")
 	fmt.Println("World Cartographer(cartographer)")
 	fmt.Println("Wise Librarian(librarian)")
 }
@@ -99,7 +99,7 @@ func (game *Game) askNameMessage() {
 }
 
 func (game *Game) askClassNameMessage() {
-	fmt.Println("What is your profession traveller?")
+	fmt.Println("What is your profession traveler?")
 	fmt.Println("(Paladin/Mage/Rouge)")
 }
 

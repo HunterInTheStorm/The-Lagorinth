@@ -24,7 +24,7 @@ type Game struct {
 	projectileList []*Spell.Projectile
 }
 
-// //this function will save a highscore to a file
+// //this function will save a high score to a file
 // func (game *Game) SaveHighScore() {
 
 // }
@@ -34,7 +34,7 @@ type Game struct {
 
 // }
 
-// //function will set the win condotion when the end of the maze has benn found
+// //function will set the win condition when the end of the maze has been found
 // func (game *Game) Evaluation() {
 // 	return true
 // }

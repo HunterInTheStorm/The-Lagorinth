@@ -1,8 +1,13 @@
+//package Spell handles the creation and functionalities of the spells in the game.
 package Spell
 
 import "github.com/golang/The-Lagorinth/Point"
 import "github.com/golang/The-Lagorinth/Labyrinth"
 
+//MageSpellSacrifice creates and return a spell.
+//It takes a Point structure as an argument, to be used for coordinates of future created projectiles.
+//The spell is created for the use of the Mage class in the game.
+//Function makes it easier to modify and balance spells on the fly.
 func MageSpellSacrifice(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point
@@ -45,6 +50,10 @@ func MageSpellSacrifice(point *Point.Point) *Spell {
 	return &spell
 }
 
+//MageSpellBallLightning creates and return a spell.
+//It takes a Point structure as an argument, to be used for coordinates of future created projectiles.
+//The spell is created for the use of the Mage class in the game.
+//Function makes it easier to modify and balance spells on the fly.
 func MageSpellBallLightning(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point
@@ -87,6 +96,10 @@ func MageSpellBallLightning(point *Point.Point) *Spell {
 	return &spell
 }
 
+//MageSpellFireBall creates and return a spell.
+//It takes a Point structure as an argument, to be used for coordinates of future created projectiles.
+//The spell is created for the use of the Mage class in the game.
+//Function makes it easier to modify and balance spells on the fly.
 func MageSpellFireBall(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point

@@ -1,10 +1,11 @@
+//Package Character handles the creation and management of characters in the game.
 package Character
 
 import "github.com/golang/The-Lagorinth/Spells"
 import "github.com/golang/The-Lagorinth/Point"
 import "github.com/golang/The-Lagorinth/Labyrinth"
 
-// //this function will create one of the 3 classes for the player
+//CreatePaladin handles the creation of the Paladin class.
 func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
 	//NPC
 	location := Point.Point{x, y, nil}
@@ -34,12 +35,11 @@ func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
 		maxMana, manaRegen, visionRadious, false, make(map[int]*Spell.Buff), true, trapHandling}
 	
-	hero := Hero{&base, PaladinClassName, charBackGround, spellList, 
-		memory, memoryDuration}
+	hero := Hero{&base, PaladinClassName, charBackGround, spellList, memory, memoryDuration}
 	return &hero
 }
 
-// //this function will create one of the 3 classes for the player
+//CreateMage handles the creation of the Mage class.
 func CreateMage(charName string, charBackGround string, x int, y int) *Hero {
 	//NPC
 	location := Point.Point{x, y, nil}
@@ -69,13 +69,12 @@ func CreateMage(charName string, charBackGround string, x int, y int) *Hero {
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
 		maxMana, manaRegen, visionRadious, false, make(map[int]*Spell.Buff), true, trapHandling}
 	
-	hero := Hero{&base, MageClassName, charBackGround, make([]*Spell.Spell, 0, 3), 
-		memory, memoryDuration}
+	hero := Hero{&base, MageClassName, charBackGround, spellList, memory, memoryDuration}
 	
 	return &hero
 }
 
-// //this function will create one of the 3 classes for the player
+//CreateRouge handles the creation of the Rouge class.
 func CreateRouge(charName string, charBackGround string, x int, y int) *Hero {
 	//ROUGE
 	//NPC
@@ -107,8 +106,7 @@ func CreateRouge(charName string, charBackGround string, x int, y int) *Hero {
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
 		maxMana, manaRegen, visionRadious, false, make(map[int]*Spell.Buff), true, trapHandling}
 	
-	hero := Hero{&base, RougeClassName, charBackGround, make([]*Spell.Spell, 0, 3), 
-		memory, memoryDuration}
+	hero := Hero{&base, RougeClassName, charBackGround, spellList, memory, memoryDuration}
 
 	return &hero
 }

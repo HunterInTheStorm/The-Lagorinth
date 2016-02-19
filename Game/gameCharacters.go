@@ -119,12 +119,21 @@ func (game *Game) characterMoveTo(character *Character.NPC, x int, y int) {
 	game.replaceTile(character.Location.X, character.Location.Y, character.Symbol)
 }
 
+func (game *Game) defeate(character *Character.NPC, place int) {
+	if game.isCharacterDefeted(character) {
+		if !character.IsHuman {
+			game.monsterDefetedMessage(character.Name, game.player.Base.Name)
+			game.lootEnemy(character)
+		}
+		game.CharacterDefeted(character, place)
+	}
+}
+
 //this function will handle the fight event
 func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
 	character.ChangeOrientation(enemyX, enemyY)
 	place, enemy := game.findEnemy(enemyX, enemyY)
 	damage := character.DoDamage()
-	//include backstab bonus somewhere around here
 	if rand.Intn(100) < enemy.Evasion {
 		game.avoidAttackMessage(character.Name, enemy.Name)
 	} else {
@@ -132,13 +141,7 @@ func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
 	enemy.ChangeOrientation(character.Location.X, character.Location.Y)
 	game.takeDamageMessage(damage, character, enemy)
 	}
-	if game.isCharacterDefeted(enemy) {
-		if !enemy.IsHuman {
-			game.monsterDefetedMessage(character.Name, game.player.Base.Name)
-			game.lootEnemy(enemy)
-		}
-		game.CharacterDefeted(enemy, place)
-	}
+	game.defeate(enemy, place)
 }
 
 func (game *Game) lootEnemy(character *Character.NPC) {
@@ -214,7 +217,14 @@ func (game *Game) CharacterDefeted(character *Character.NPC, place int) {
 	}
 }
 
+func (game *Game) checkForDefeatedCharacters() {
+	for place, monster := range game.monsterList {
+		game.defeate(monster, place)
+	}
+}
+
 func (game *Game) moveMonsters() {
+	game.checkForDefeatedCharacters()
 	for _, monster := range game.monsterList {
 		if !monster.IsStunned {
 			location := monster.Move(game.labyrinth)

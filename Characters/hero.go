@@ -1,3 +1,4 @@
+//Package Character handles the creation and management of characters in the game.
 package Character
 
 import "github.com/golang/The-Lagorinth/Point"
@@ -14,18 +15,19 @@ type Hero struct {
 	MemoryDuration int
 }
 
-// //will replace the bonuses given from one weapon for the bonuses of another
+//SwapArmor replaces the currently equipped Weapon with a new one.
 func (hero *Hero) SwapWeapon(weapon *Items.Weapon) {
 	hero.Base.UnequipWeapon()
 	hero.Base.EquipWeapon(weapon)
 }
 
-// //will replace the bonuses given from one armor for the bonuses of another
+//SwapArmor replaces the currently equipped Armor with a new one.
 func (hero *Hero) SwapArmor(armor *Items.Armor) {
 	hero.Base.UnequipArmor()
 	hero.Base.EquipArmor(armor)
 }
 
+//ApplyBackground add the arguments' field values to those of the character.
 func (hero *Hero) ApplyBackground(background *BackGround) {
 	hero.BackGround = background.Name
 	hero.MemoryDuration += background.BonusMemoryDuration
@@ -42,6 +44,8 @@ func (hero *Hero) ApplyBackground(background *BackGround) {
 	hero.Base.DmgMultuplier += background.BonusDmgMultuplier
 }
 
+
+//UseInstantSpell handles the use of an instant spell
 func (hero *Hero) UseInstantSpell(spell *Spell.Spell) {
 	hero.Base.CurrentMana -= spell.ManaCost
 	hero.Base.CurrentHealth += spell.RegainHealth
@@ -55,7 +59,8 @@ func (hero *Hero) UseInstantSpell(spell *Spell.Spell) {
 	}
 }
 
-//a spell from the list of selfcast spells will be envoked
+//UseBuffSpell handles the use of a Buff Spell.
+//Creates and applies a buff to the character.
 func (hero *Hero) UseBuffSpell(spell *Spell.Spell) {
 	hero.Base.CurrentMana -= spell.ManaCost
 	buff := spell.CreateBuff()
@@ -70,17 +75,14 @@ func (hero *Hero) UseBuffSpell(spell *Spell.Spell) {
 
 
 
-// //a spell from the list of targetble spells will be envoked
+//UseProjectileSpell returns a projectile created from the Spell argument. 
 func (hero *Hero) UseProjectileSpell(spell *Spell.Spell) *Spell.Projectile {
 	crit := hero.Base.CritChance + hero.Base.Weapon.BonusCritChance
 	hero.Base.CurrentMana -= spell.ManaCost
 	return spell.CreateProjectile(hero.Base.Orientation, crit)
 }
 
-// func (hero *Hero) UseAreaOfEffectSpell() Effect {
-
-// }
-
+//UpdateMemory will lower the duration for which a character remembers a tile.
 func (hero *Hero) UpdateMemory() {
 	for point, _ := range hero.Memory {
 		if hero.Memory[point] > -1 {
@@ -91,8 +93,8 @@ func (hero *Hero) UpdateMemory() {
 	}
 }
 
-// //given an array of Points the character memory of the labyrinth will be updated with new tiles
-// //that he remebers(tiles that will be displyed)
+//MemorizeLabyrinth determines which tiles a character can see and add them to a map.
+//Takes a labyrinth as an argument.
 func (hero *Hero) MemorizeLabyrinth(labyrinth *Labyrinth.Labyrinth, center *Point.Point) {
 	var minX int = center.X - hero.Base.VisionRadious
 	var maxX int = center.X + hero.Base.VisionRadious

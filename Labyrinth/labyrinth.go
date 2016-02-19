@@ -1,19 +1,15 @@
-/*
-	Here we create a randomly generated maze/labyrinth using Prim's algorithm.
-	Description of said algorithm can be found on https://en.wikipedia.org/wiki/Prim%27s_algorithm
-	We also define structure Point which is used in the maze generation as well tracking the position
-	of various objects/structures(npc, traps, the playeble character ect)
-	Not only do we generate the labyrith but we also run chechs,
-	for where to place truesures(in dead-ends of the maze) and traps(on crossroads) 
-*/
-
-
-
+//Package Labyrinth handles the creation of a creation of a labyrinth.
+//Prim's algorithm is used for the creation pf said labyrinth.
+//More detail can be found here: https://en.wikipedia.org/wiki/Prim%27s_algorithm
+//The algorithm ensures a randomly generated labyrinth.
+//In addition, the package expands on the idea providing algorithm for chest and enemy placement in the labyrinth(random).
 package Labyrinth
 
 import "github.com/golang/The-Lagorinth/Point"
 import "math/rand"
 
+//Global variables used in the project.
+//This way it is easy to modify objects in the fly.
 var Wall string = "0"
 var Pass string = " "
 var Treasure string = "$"
@@ -28,29 +24,23 @@ var chanceToBeTreasure int = 25
 var chanceToBeTrap int = 10
 var chanceToBeNpc int = 15
 
-//The structure has 3 fields:
-//	integers for X and Y coordinates
-//	field for parent Point
-
-
-//The stucture has two fields:
-//integers width and height of the labyrinth/2D array
-//2D array of strings(of characters) which will represent the generated maze
 type Labyrinth struct{
 	Width, Height int
-	//rng int
 	Labyrinth [40][40]string
 }
 
+//CreateLabyrinth call Prim function which handles the creation pf the labyrinth.
+//It sets the rand seed.
+//It also expands the labyrinth by calling createTreasuresAndTraps function.
+//That function determines the location of chests, traps and enemies.
 func (lab *Labyrinth) CreateLabyrinth(seed int64) {
 	rand.Seed(seed)
 	lab.Prim()
 	lab.createTreasuresAndTraps()
 }
 
-//The main algorithm used to generate the maze
-//"0" for wall cells
-//" " for empty cells(a.k.a path)
+//Prim is the algorithm used to generate the maze.
+//refer to package description for more details on Prim's algorithm.
 func (lab *Labyrinth) Prim() {
 	frontier := make([]Point.Point, 0, 40)
 	var start Point.Point = Point.Point{rand.Intn(lab.Width - 1) + 1, rand.Intn(lab.Width - 1) + 1, nil}
@@ -80,7 +70,10 @@ func (lab *Labyrinth) Prim() {
 	}
 }
 
-//all neighbours(left, right, top, bottom) of a given Point will be passed to AddNeighbour
+//neighbours takes 2 arguments.
+//A slice which is passed on to addNeighbour.
+//And a point. Function determines all of the point's neighbours and passes their coordinates to addNeighbour.
+//Point is passed on to addNeighbour as well to be used as a parent point for its neighbours.
 func(lab *Labyrinth) neighbours(point *Point.Point, frontier *[]Point.Point) {
 	lab.addNeighbour(point.X + 1, point.Y  	 , point, frontier)
 	lab.addNeighbour(point.X - 1, point.Y 	 , point, frontier)
@@ -89,7 +82,11 @@ func(lab *Labyrinth) neighbours(point *Point.Point, frontier *[]Point.Point) {
 }
 
 
-//adds the Neighbours af a give point to the frontier list which is used in the maze generation algorithm
+//addNeighbour add a point to frontier slice if the point is not has not been added already.
+//Function takes 4 arguments.
+//2 coordinates for the point to be added to frontier slice.
+//A parent point.
+//And the slice itself.
 func(lab *Labyrinth) addNeighbour(x int, y int, parent *Point.Point, frontier *[]Point.Point) {
 	if !pointMap[Point.Point{x, y, parent}] {
 		if (x > 0 && x < lab.Width - 1) && (y > 0 && y < lab.Height - 1) {
@@ -100,6 +97,8 @@ func(lab *Labyrinth) addNeighbour(x int, y int, parent *Point.Point, frontier *[
 	}
 }
 
+//countWalls counts how many of the neighbours of a point, in the labyrinth, are walls and returns that count.
+//Function takes 2 arguments, the coordinates of the point.
 func(lab *Labyrinth) countWalls(x int, y int) int {
 	var wallCount int = 0
 	if lab.Labyrinth[x + 1][y] == Wall {
@@ -117,23 +116,27 @@ func(lab *Labyrinth) countWalls(x int, y int) int {
 	return wallCount
 }
 
-//Determines if a given point has 3 neighnours that are "wall" cells
+//isDeadEnd returns true if a point in the labyrinth has 3 neighbours that are walls
+//Function takes 2 arguments, the coordinates of the point.
 func(lab *Labyrinth) isDeadEnd(x int, y int) bool {
 	return lab.countWalls(x, y) == 3
 }
 
-// IsTreasure 25% to place a treasure at a dead-end in the maze
+//isTreasure return true if a random value is lower than chanceToBeTreasure global variable.
+//Function is used for the placement of treasures in the labyrinth. 
 func(lab *Labyrinth) isTreasure() bool {
 	return rand.Intn(100) < chanceToBeTreasure 
 }
 
+//placeNpc places a monster symbol in the labyrinth if a random value is lower than chanceToBeNpc global variable.
+//It takes 2 arguments, the coordinates of the point where the symbol will be places.
 func(lab *Labyrinth) placeNpc(x int, y int) {
 	if rand.Intn(100) < chanceToBeNpc {
 		lab.Labyrinth[x][y] = Monster
 	}
 }
 
-//places a "T" for treasure in the 2d array at x and y coordinates
+//createTreasuresAndTraps handles the placement of treasures, traps and monsters in the labyrinth.
 func(lab *Labyrinth) createTreasuresAndTraps() {
 	for i := 1; i < lab.Width - 1; i++ {
 		for j := 1; j < lab.Height - 1; j++ {
@@ -157,16 +160,18 @@ func(lab *Labyrinth) createTreasuresAndTraps() {
 	}
 }
 
+//IsInBondaries determines of the arguments are within the labyrinth.
+//Will return false if the arguments are negative or greater than the dimensions of the labyrinth.
 func (lab *Labyrinth) IsInBondaries(x int, y int) bool {
 	return x > -1 && x < lab.Width && y > -1 && y < lab.Height
 }
 
-//Determines if a given point is a crossroad, a point that has 1 or 0 neighbours that are "wall" cells
+//isCrossRoad returns true if 1 or less of the neighbours of point are walls.
 func(lab *Labyrinth) isCrossRoad(x int, y int) bool {
 	return lab.countWalls(x, y) < 2
 }
 
-//at a given crossroad randoms whethere the tile will be a trap
+//isTrap returns true if a random value is lower than the chanceToBeTrap global variable.
 func(lab *Labyrinth) isTrap() bool {
 	return rand.Intn(100) < chanceToBeTrap
 }

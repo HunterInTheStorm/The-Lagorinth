@@ -1,7 +1,11 @@
+//package Spell handles the creation and functionalities of the spells in the game.
 package Spell
 
 import "github.com/golang/The-Lagorinth/Point"
 
+//id is used in the creation of spells and more accurately Buffs.
+//It assures the same Buff cannot be applied to a character again.
+//Instead only refreshing the duration.
 var id int = 0
 
 type Spell struct {
@@ -22,11 +26,14 @@ type Spell struct {
 	BuffId int
 }
 
+//GoOnCoolDown sets a cool down for the used spell so that it cannot be used again until it reaches 0. 
 func (spell *Spell) GoOnCoolDown() {
 	spell.IsOnCoolDown = true
 	spell.CoolDownTimeLeft = spell.CoolDownTime
 }
 
+//LowerCoolDownTime lowers the cool down a spell by 1 for every call.
+//When it reaches 0 the IsOnCoolDown flag is set to false
 func (spell *Spell) LowerCoolDownTime() {
 	if spell.CoolDownTimeLeft > 0 {
 		spell.CoolDownTimeLeft--
@@ -36,6 +43,8 @@ func (spell *Spell) LowerCoolDownTime() {
 	}
 }
 
+//CreateBuff creates and returns a new Buff structure.
+//Values from the Spell structure are used to create the values for the Buff structure
 func (spell *Spell) CreateBuff() *Buff {
 	var buffName string = spell.SpellName
 	var buffID int = spell.BuffId
@@ -55,6 +64,8 @@ func (spell *Spell) CreateBuff() *Buff {
 	return &buff
 }
 
+//CreateProjectile creates and returns a new Projectile structure.
+//Values from the Spell structure are used to create the values for the Projectile structure
 func (spell *Spell) CreateProjectile(vector *Point.Point, critical int) *Projectile {
 	var symbol string = spell.Symbol
 	var spellName string = spell.SpellName
@@ -74,19 +85,3 @@ func (spell *Spell) CreateProjectile(vector *Point.Point, critical int) *Project
 		critChance, damage, buff}
 	return &projectile
 }
-
-//type Effect struct {
-// 	center Point.Point
-// 	radius int
-// 	duration int
-// 	damage int
-// 	buff *Buff
-// }
-
-// func (spell Spell) CreateAreaOfEffect(hero *Character) Effect {
-// 	center Point
-// 	radius int
-// 	duration int
-// 	damage int
-// 	buff *Buff
-// }

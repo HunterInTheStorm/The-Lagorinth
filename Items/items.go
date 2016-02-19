@@ -1,18 +1,14 @@
+//Package Items creates items for the characters on the game.
 package Items
 
 import "math/rand"
 
-//This structure has 4 fields:
-//minimum and maximum damage of the weapon represented by integers
-//integer for additional bonus damage
-//integer for chance to do a critical hit
 type Weapon struct {
 	MinDmg, MaxDmg, BonusDmg, BonusCritChance int
-	//rng int
 }
 
 
-//REPLACE MAGIC NUMBERS
+//RandomizeWeapon randomizes the field values of a weapon.
 func (weapon *Weapon) RandomizeWeapon() {
 	weapon.MinDmg = rand.Intn(5) + 10
 	weapon.MaxDmg = weapon.MinDmg + rand.Intn(15)
@@ -20,7 +16,7 @@ func (weapon *Weapon) RandomizeWeapon() {
 	weapon.BonusCritChance = rand.Intn(11)/10
 }
 
-//return and integer between minimum and maximum damage
+//Damage return a random value between weapon's minimum damage and maximum damage added to bonusDmg field value.
 func (weapon Weapon) Damage() float32 {
 	return float32(rand.Intn(weapon.MaxDmg + 1 - weapon.MinDmg) + weapon.MinDmg + weapon.BonusDmg)
 }
@@ -29,11 +25,9 @@ type Armor struct {
 	Defence, Evasion int
 	Health, HealthRegen float32
 	Mana, ManaRegen float32
-	//mana regeneration
-	//reduced mana cost
 }
 
-//REPLACE MAGIC NUMBERS
+//RandomizeArmor randomizes the field values of a armor.
 func (armor *Armor) RandomizeArmor() {
 	armor.Defence = rand.Intn(6) + 8
 	armor.Evasion = rand.Intn(6)

@@ -1,13 +1,18 @@
+//package Spell handles the creation and functionalities of the spells in the game.
 package Spell
 
 import "github.com/golang/The-Lagorinth/Point"
 import "github.com/golang/The-Lagorinth/Labyrinth"
 
+//PaladinSpellHeal creates and return a spell.
+//It takes a Point structure as an argument, to be used for coordinates of future created projectiles.
+//The spell is created for the use of the Paladin class in the game.
+//Function makes it easier to modify and balance spells on the fly.
 func PaladinSpellHeal(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point
 	var symbol string = ""
-	var spellName string = "Greate Heal"
+	var spellName string = "Great Heal"
 	var isSelfTargeted bool = true
 	var isProjectile bool = false
 	var isAreaOfEffect bool = false
@@ -45,6 +50,10 @@ func PaladinSpellHeal(point *Point.Point) *Spell {
 	return &spell
 }
 
+//PaladinSpellHolyArmor creates and return a spell.
+//It takes a Point structure as an argument, to be used for coordinates of future created projectiles.
+//The spell is created for the use of the Paladin class in the game.
+//Function makes it easier to modify and balance spells on the fly.
 func PaladinSpellHolyArmor(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point
@@ -87,6 +96,10 @@ func PaladinSpellHolyArmor(point *Point.Point) *Spell {
 	return &spell
 }
 
+//PaladinSpellHolyBolt creates and return a spell.
+//It takes a Point structure as an argument, to be used for coordinates of future created projectiles.
+//The spell is created for the use of the Paladin class in the game.
+//Function makes it easier to modify and balance spells on the fly.
 func PaladinSpellHolyBolt(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point

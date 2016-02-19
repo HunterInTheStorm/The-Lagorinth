@@ -1,3 +1,4 @@
+//package Spell handles the creation and functionalities of the spells in the game.
 package Spell
 
 type Buff struct {
@@ -11,6 +12,7 @@ type Buff struct {
 	ManaCostPerTurn float32
 }
 
+//LowerDuration lower the duration left on a buff
 func (buff *Buff) LowerDuration() {
 	buff.Duration--
 }

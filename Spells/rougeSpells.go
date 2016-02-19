@@ -1,8 +1,13 @@
+//package Spell handles the creation and functionalities of the spells in the game.
 package Spell
 
 import "github.com/golang/The-Lagorinth/Point"
 import "github.com/golang/The-Lagorinth/Labyrinth"
 
+//RougeSpellPrecision creates and return a spell.
+//It takes a Point structure as an argument, to be used for coordinates of future created projectiles.
+//The spell is created for the use of the Rouge class in the game.
+//Function makes it easier to modify and balance spells on the fly.
 func RougeSpellPrecision(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point
@@ -45,6 +50,10 @@ func RougeSpellPrecision(point *Point.Point) *Spell {
 	return &spell
 }
 
+//RougeSpellShadow creates and return a spell.
+//It takes a Point structure as an argument, to be used for coordinates of future created projectiles.
+//The spell is created for the use of the Rouge class in the game.
+//Function makes it easier to modify and balance spells on the fly.
 func RougeSpellShadow(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point
@@ -87,6 +96,10 @@ func RougeSpellShadow(point *Point.Point) *Spell {
 	return &spell
 }
 
+//RougeSpellAssassinMark creates and return a spell.
+//It takes a Point structure as an argument, to be used for coordinates of future created projectiles.
+//The spell is created for the use of the Rouge class in the game.
+//Function makes it easier to modify and balance spells on the fly.
 func RougeSpellAssassinMark(point *Point.Point) *Spell {
 	//All spells have this
 	origin := point
@@ -128,3 +141,4 @@ func RougeSpellAssassinMark(point *Point.Point) *Spell {
 	id++
 	return &spell
 }
+

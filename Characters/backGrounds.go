@@ -1,3 +1,4 @@
+//Package Character handles the creation and management of characters in the game.
 package Character
 
 type BackGround struct {
@@ -14,6 +15,7 @@ type BackGround struct {
 	BonusDmgMultuplier float32
 }
 
+//CreateBgGiant returns a background structure.
 func CreateBgGiant() *BackGround{
 	var memoryDuration int = 0
 	var visionRadius int = 0
@@ -32,6 +34,7 @@ func CreateBgGiant() *BackGround{
 	return &background
 }
 
+//CreateBgToreador returns a background structure.
 func CreateBgToreador() *BackGround {
 	var memoryDuration int = 0
 	var visionRadius int = 1
@@ -50,6 +53,7 @@ func CreateBgToreador() *BackGround {
 	return &background
 }
 
+//CreateBgCartographer returns a background structure.
 func CreateBgCartographer() *BackGround {
 	var memoryDuration int = 20
 	var visionRadius int = 3
@@ -68,6 +72,7 @@ func CreateBgCartographer() *BackGround {
 	return &background
 }
 
+//CreateBgLibrarian returns a background structure.
 func CreateBgLibrarian() *BackGround {
 	var memoryDuration int = 12
 	var visionRadius int = 0

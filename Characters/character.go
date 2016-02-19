@@ -1,3 +1,4 @@
+//Package Character handles the creation and management of characters in the game.
 package Character
 
 import "github.com/golang/The-Lagorinth/Items"
@@ -24,6 +25,9 @@ type NPC struct {
 	TrapHandling int
 }
 
+//moveTowardsHero determines if a character can move towards the player.
+//Function returns 2 values.
+//True if the player is next to the character and his coordinates.
 func (npc *NPC) moveTowardsHero(labyrinth *Labyrinth.Labyrinth) (bool, *Point.Point) {
 	var upTile string
 	if labyrinth.IsInBondaries(npc.Location.X - 1, npc.Location.Y) {
@@ -59,6 +63,8 @@ func (npc *NPC) moveTowardsHero(labyrinth *Labyrinth.Labyrinth) (bool, *Point.Po
 	return false, &Point.Point{}
 }
 
+//makeDecisionWhereToMove determines to which empty tile a character should move to.
+//Return true if such a tile exists and its coordinates.
 func (npc *NPC) makeDecisionWhereToMove(labyrinth *Labyrinth.Labyrinth) (bool, *Point.Point) {
 	frontTile := labyrinth.Labyrinth[npc.Location.X + npc.Orientation.X][npc.Location.Y + npc.Orientation.Y]
 	if frontTile != Labyrinth.Wall && frontTile != Labyrinth.Monster && frontTile != Labyrinth.Treasure {
@@ -90,7 +96,7 @@ func (npc *NPC) makeDecisionWhereToMove(labyrinth *Labyrinth.Labyrinth) (bool, *
 	return false, &Point.Point{-1,-1,nil}
 }
 
-//a npc will move one forward depemding on its orientation
+//Move handles characters movement.
 func (npc *NPC) Move(labyritnh *Labyrinth.Labyrinth) *Point.Point {
 	isNextToHero, location := npc.moveTowardsHero(labyritnh)
 	if isNextToHero {
@@ -103,25 +109,26 @@ func (npc *NPC) Move(labyritnh *Labyrinth.Labyrinth) *Point.Point {
 	return npc.Location
 }
 
-//function that changes the orientation of a npc
+//ChangeOrientation changes the field value that tracks where to character is facing.
 func (npc *NPC) ChangeOrientation(x2 int, y2 int) {
 	npc.Orientation.X = x2 - npc.Location.X
 	npc.Orientation.Y = y2 - npc.Location.Y
 }
 
-//add all of the values of a weapon's properties to the character's
+//EquipWeapon sets a reference for the weapon argument.
 func (npc *NPC) EquipWeapon(newWeapon *Items.Weapon) {
 	npc.Weapon = newWeapon
 }
 
-//remove all of the values of a weapon's properties from the character's
+//UnequipWeapon removes the reference for currently equipped weapon.
 func (npc *NPC) UnequipWeapon() {
 	if npc.Weapon != nil {
 		npc.Weapon = nil
 	}
 }
 
-//add all of the values of a armor's properties to the character's
+//EquipArmor sets a reference for the armor argument.
+//Also adds the armor field values to those of the character.
 func (npc *NPC) EquipArmor(newArmor *Items.Armor) {
 	npc.Armor = newArmor
 	npc.CurrentHealth += newArmor.Health
@@ -133,7 +140,8 @@ func (npc *NPC) EquipArmor(newArmor *Items.Armor) {
 	npc.ManaRegen += newArmor.ManaRegen
 }
 
-//remove all of the values of a armor's properties from the character's
+//EquipArmor removes the reference for the equipped armor.
+//Also removes the armor field values from those of the character.
 func (npc *NPC) UnequipArmor() {
 	if npc.Armor != nil {
 		npc.CurrentHealth -= npc.Armor.Health
@@ -147,7 +155,7 @@ func (npc *NPC) UnequipArmor() {
 	}
 }
 
-//the function returns the damage(integer) the character will do to an enemy
+//DoDamage return the damage the character will deal.
 func (npc *NPC) DoDamage() float32 {
 	if rand.Intn(100) < npc.CritChance + npc.Weapon.BonusCritChance {
 		return 2 * npc.DmgMultuplier * npc.Weapon.Damage()
@@ -155,11 +163,13 @@ func (npc *NPC) DoDamage() float32 {
 	return npc.DmgMultuplier * npc.Weapon.Damage()
 }
 
+//CombinedDefence return the sum of the armor's defense with the character's defense.
 func (npc *NPC) CombinedDefence() float32 {
 	return float32(npc.Defence + npc.Armor.Defence)
 }
 
-//the function substracs the funcyion's argument "damage" from the characters currentHealth
+//TakeDamage substracts the received argument from the character health points.
+//the argument's value is lowered by the defense of the character.
 func (npc *NPC) TakeDamage(damage float32) {
 	var damageTaken float32 = damage - npc.CombinedDefence()
 	if damageTaken > 0 {
@@ -167,7 +177,7 @@ func (npc *NPC) TakeDamage(damage float32) {
 	}
 }
 
-//Function will update character's currentHealth to a higher value
+//RegenHealth add the health regeneration value to the current health points value.
 func (npc *NPC) RegenHealth() {
 	npc.CurrentHealth = npc.CurrentHealth + npc.HealthRegen
 	if npc.CurrentHealth > npc.MaxHealth {
@@ -175,7 +185,7 @@ func (npc *NPC) RegenHealth() {
 	}
 }
 
-//Function will update character's currentMana to a higher value
+//RegenHealth add the mana regeneration value to the current mana points value.
 func (npc *NPC) RegenMana() {
 	npc.CurrentMana = npc.CurrentMana + npc.ManaRegen
 	if npc.CurrentMana > npc.MaxMana {
@@ -183,6 +193,7 @@ func (npc *NPC) RegenMana() {
 	}
 }
 
+//ApplyBuff receives a argument Buff and add its field values to those of the character.
 func (npc *NPC) ApplyBuff(buff *Spell.Buff) {
 	npc.HealthRegen += buff.BonusHealthRegen
 	npc.DmgMultuplier += buff.BonusDamageMultiplier
@@ -193,6 +204,7 @@ func (npc *NPC) ApplyBuff(buff *Spell.Buff) {
 	npc.ManaRegen -= buff.ManaCostPerTurn
 }
 
+//ApplyBuff receives a argument Buff and substracts its field values from those of the character.
 func (npc *NPC) RemoveBuff(buff *Spell.Buff) {
 	npc.HealthRegen -= buff.BonusHealthRegen
 	npc.DmgMultuplier -= buff.BonusDamageMultiplier
@@ -203,11 +215,15 @@ func (npc *NPC) RemoveBuff(buff *Spell.Buff) {
 	npc.ManaRegen += buff.ManaCostPerTurn
 }
 
+//Regenerate call the RegenMana() and RegenHealth() functions.
 func (npc *NPC) Regenerate() {
 	npc.RegenMana()
 	npc.RegenHealth()
 }
 
+//ProjectileToTheFace takes one argument - Projectile.
+//Stuns the character if the WillStun flag is true.
+//Applies a buff to the character if such a buff exists.
 func (npc *NPC) ProjectileToTheFace(projectile *Spell.Projectile) {
 	npc.IsStunned = projectile.WillStun
 	if projectile.Buff != nil {
