@@ -67,32 +67,6 @@ func (game *Game) lowManaMessage(spell *Spell.Spell) {
 	time.Sleep(2000 * time.Millisecond)
 }
 
-func (game *Game) useSpell(spell *Spell.Spell, hero *Character.Hero) {
-	if spell.ManaCost < hero.Base.CurrentMana {
-		if !spell.IsOnCoolDown {
-			if spell.IsSelfTargeted && !spell.IsBuff {
-				hero.UseInstantSpell(spell)
-				game.useInstantSpellMessage(spell, hero)
-				spell.GoOnCoolDown()
-			} else if spell.IsSelfTargeted && spell.IsBuff {
-				hero.UseBuffSpell(spell)
-				game.useBuffSpellMessage(spell, hero)
-				spell.GoOnCoolDown()
-			} else if spell.IsProjectile {
-				projectile := hero.UseProjectileSpell(spell)
-				game.projectileList = append(game.projectileList, projectile)
-				spell.GoOnCoolDown()
-			} else if spell.IsAreaOfEffect {
-				// asfd
-			}
-		} else {
-			game.spellOnCoolDownMessage(spell)
-		}
-	} else {
-		game.lowManaMessage(spell)
-	}
-}
-
 func(game *Game) chooseName() string {
 	fmt.Println("What is your name mighty adventurer?")
  	reader := bufio.NewReader(os.Stdin)
@@ -654,82 +628,7 @@ func (game *Game) initialize() {
 	game.createHero()
 }
 
-func (game *Game) drawHero() {
-	game.labyrinth.Labyrinth[game.player.Base.Location.X][game.player.Base.Location.Y] = Labyrinth.CharSymbol
-}
 
-func (game *Game) drawTraps() {
-	for trapPoint, _ := range game.trapList {
-		game.labyrinth.Labyrinth[trapPoint.X][trapPoint.Y] = Labyrinth.Trap
-	}
-}
-
-func (game *Game) drawMonsters() {
-	for _, mon := range game.monsterList {
-		game.labyrinth.Labyrinth[mon.Location.X][mon.Location.Y] = mon.Symbol
-	}
-}
-
-func (game *Game) drawProjectiles() {
-	for _, projectile := range game.projectileList {
-		game.labyrinth.Labyrinth[projectile.Location.X][projectile.Location.Y] = projectile.Symbol
-	}
-}
-
-// //function replaces an element fro the 2d array for the maze with the character symbol
-func (game *Game) drawCharacters() {
-	game.drawTraps()
-	game.drawHero()
-	game.drawProjectiles()
-	game.drawMonsters()
-}
-
-//function to draw the labyrinth
-func (game *Game) drawLabyrinth() {
-	var maxX int = game.camera.X + game.cameraRadius
-	var minX int = game.camera.X - game.cameraRadius
-	var maxY int = game.camera.Y + game.cameraRadius
-	var minY int = game.camera.Y - game.cameraRadius
-	for i := minX; i <= maxX; i++ {
-		for j := minY; j <= maxY; j++ {
-			if game.labyrinth.IsInBondaries(i, j) {
-				if point, ok := game.player.Memory[Point.Point{i, j, nil}]; ok && point > -1 {
-					if game.labyrinth.Labyrinth[i][j] == Labyrinth.Trap {
-						trap := game.trapList[Point.Point{i, j, nil}]
-						if trap.IsDetected {
-							fmt.Print(game.labyrinth.Labyrinth[i][j])
-						} else {
-							fmt.Print(Labyrinth.Pass)
-						}
-					} else {
-						fmt.Print(game.labyrinth.Labyrinth[i][j])
-					}
-				} else {
-					fmt.Print("+")
-				}
-			} else {
-				fmt.Print("-")
-			}
-		}
-		fmt.Println()
-	}
-}
-
-func (game *Game) drawHeroStats(hero *Character.NPC) {
-	fmt.Printf("HP: %v\\%v\tMP: %v\\%v\n", int(hero.CurrentHealth), hero.MaxHealth, int(hero.CurrentMana), hero.MaxMana)
-	fmt.Printf("HP Regen: %v\tMP Regen: %v\n", int(hero.HealthRegen), int(hero.ManaRegen))
-	damageMin := hero.DmgMultuplier * float32((hero.Weapon.MinDmg + hero.Weapon.BonusDmg))
-	damageMax := hero.DmgMultuplier * float32((hero.Weapon.MaxDmg + hero.Weapon.BonusDmg))
-	fmt.Printf("DMG: %v - %v\tDef:%v\n", int(damageMin), int(damageMax), int(hero.CombinedDefence()))
-	fmt.Printf("Evs:%v\t\tCrit:%v\n", hero.Evasion, hero.CritChance)
-}
-
-func (game *Game) draw() {
-	game.clearScreen()
-	game.drawCharacters()
-	game.drawLabyrinth()
-	game.drawHeroStats(game.player.Base)
-}
 
 func (game *Game) detectKeyPress() string{
 	reader := bufio.NewReader(os.Stdin)
@@ -843,19 +742,6 @@ func (game *Game) moveMonsters() {
 	}
 }
 
-func (game *Game) removeProjectile(place int) {
-	game.projectileList = append(game.projectileList[:place], game.projectileList[place +1:]...)
-}
-
-func (game *Game) findProjectile(x int, y int) int {
-	for place, projectile := range game.projectileList {
-		if x == projectile.Location.X && y == projectile.Location.Y {
-			return place
-		}
-	}
-	return -1
-}
-
 func (game *Game) takeSpellDamageMessage(damage float32, character *Character.NPC) {
 	fmt.Printf("%s is hit for %v spell damage", character.Name, int(damage))
 	time.Sleep(2000 * time.Millisecond)
@@ -866,113 +752,16 @@ func (game *Game) avoidSpellMessage(character *Character.NPC) {
 	time.Sleep(2000 * time.Millisecond)
 }
 
-func (game *Game) projectileHitsCharacter(x int, y int, projectile *Spell.Projectile) {
-	place, enemy := game.findEnemy(x, y)
-	enemy.ProjectileToTheFace(projectile)
-	damage := projectile.DoDamage()
-	if rand.Intn(100) < enemy.Evasion {
-		game.avoidSpellMessage(enemy)
-	} else {
-	enemy.TakeDamage(damage)
-	game.takeSpellDamageMessage(damage, enemy)
-	}
-	if game.isCharacterDefeted(enemy) {
-		game.CharacterDefeted(enemy, place)
-	}
-}
-
-
-func (game *Game) projectileMoveTo(projectile *Spell.Projectile, x int, y int) {
-	game.restoreTile(projectile.Location.X, projectile.Location.Y)
-	projectile.Move()
-	game.replaceTile(projectile.Location.X, projectile.Location.Y, projectile.Symbol)
-}
-
-func (game *Game) projectileActionEvent(x int, y int, projectile *Spell.Projectile, place int) {
-	switch game.labyrinth.Labyrinth[x][y] {
-	case Labyrinth.Pass:
-		game.projectileMoveTo(projectile, x, y)
-	case Labyrinth.StartPosition:
-		game.projectileMoveTo(projectile, x, y)
-	case Labyrinth.ExitPosition:
-		game.projectileMoveTo(projectile, x, y)
-	case Labyrinth.Trap:
-		game.projectileMoveTo(projectile, x, y)
-	case Labyrinth.Treasure:
-		game.projectileMoveTo(projectile, x, y)
-		projectile.ProjectileImapact(game.labyrinth)
-		game.removeProjectile(place)
-	case Labyrinth.Projectile:
-		spot := game.findProjectile(x, y)
-		game.removeProjectile(place)
-		game.removeProjectile(spot)
-	case Labyrinth.Wall:
-		game.projectileMoveTo(projectile, x, y)
-		projectile.ProjectileImapact(game.labyrinth)
-		game.removeProjectile(place)
-	case Labyrinth.Monster:
-		game.projectileMoveTo(projectile, x, y)
-		game.projectileHitsCharacter(x, y, projectile)
-		game.removeProjectile(place)
-	case Labyrinth.CharSymbol:
-		game.projectileMoveTo(projectile, x, y)
-		game.projectileHitsCharacter(x, y, projectile)
-		game.removeProjectile(place)
-	}
-}
-
-func (game *Game) activateSpells() {
-	for place, projectile := range game.projectileList {
-		x := projectile.Location.X + projectile.Vector.X
-		y := projectile.Location.Y + projectile.Vector.Y
-		game.projectileActionEvent(x, y, projectile, place)
-	}
-}
-
 func (game *Game) npcsTurn() {
 	game.activateSpells()
 	game.checkTraps()
 	game.moveMonsters()
 }
 
-func (game *Game) clearScreen() {
-	c := exec.Command("cmd", "/c", "cls")
-	c.Stdout = os.Stdout
-	c.Run()
-}
-
 func (game *Game) applyRegenToAll() {
 	game.player.Base.Regenerate()
 	for _, monster := range game.monsterList {
 		monster.Regenerate()
-	}
-}
-
-func (game *Game) lowerCoolDownOnSpells() {
-	for _, spell := range game.player.SpellList {
-		spell.LowerCoolDownTime()
-	}
-}
-
-func (game *Game) lowerCharacterBuffDuration(character *Character.NPC) {
-	for _, buff := range character.BuffList {
-		if buff.Duration > 0 {
-			buff.LowerDuration()	
-		} else {
-			character.RemoveBuff(buff)
-			if character.IsHuman {
-				game.buffFadeMessage(buff)
-			}
-			delete(character.BuffList, buff.BuffID)
-		}
-	}
-}
-
-func (game *Game) manageSpells(){
-	game.lowerCoolDownOnSpells()
-	game.lowerCharacterBuffDuration(game.player.Base)
-	for _, monster := range game.monsterList {
-		game.lowerCharacterBuffDuration(monster)
 	}
 }
 
