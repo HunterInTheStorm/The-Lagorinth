@@ -617,7 +617,7 @@ func (game *Game) createLabyrinth() {
 		}
 	}
 	game.labyrinth = &Labyrinth.Labyrinth{40,40, maze}
-	game.labyrinth.Prim(seed)
+	game.labyrinth.CreateLabyrinth(seed)
 }
 
 func (game *Game) createMonsterAndTrapsLists() {

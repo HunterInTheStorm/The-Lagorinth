@@ -6,10 +6,10 @@ He will have to fight his way through "hordes" of enemies finding treasure along
 Planned Features:
 - randomly generated level 															DONE
 - choice among 3 palyeble classes 													DONE
-- each class has unieq speels														NOTDONE
+- each class has unieq speels														DONE
 - choice of backgroung for the player, providing additional bonuses 				DONE
 - tresures and traps placed randomly in the labyrinth 								DONE
-- HighScore 																		NOTDONE
+- HighScore 																		
 - armor and weapon can be found in chests and from defeted enemies 					DONE
 
 

@@ -42,12 +42,17 @@ type Labyrinth struct{
 	Labyrinth [40][40]string
 }
 
+func (lab *Labyrinth) CreateLabyrinth(seed int64) {
+	rand.Seed(seed)
+	lab.Prim()
+	lab.createTreasuresAndTraps()
+}
+
 //The main algorithm used to generate the maze
 //"0" for wall cells
 //" " for empty cells(a.k.a path)
-func (lab *Labyrinth) Prim(seed int64) {
+func (lab *Labyrinth) Prim() {
 	frontier := make([]Point.Point, 0, 40)
-	rand.Seed(seed)
 	var start Point.Point = Point.Point{rand.Intn(lab.Width - 1) + 1, rand.Intn(lab.Width - 1) + 1, nil}
 	lab.Labyrinth[start.X][start.Y] = StartPosition
 	lab.neighbours(&start, &frontier)
@@ -73,7 +78,6 @@ func (lab *Labyrinth) Prim(seed int64) {
 			break
 		}
 	}
-	lab.createTreasuresAndTraps()
 }
 
 //all neighbours(left, right, top, bottom) of a given Point will be passed to AddNeighbour
