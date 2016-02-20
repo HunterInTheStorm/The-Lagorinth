@@ -7,11 +7,11 @@ import "github.com/golang/The-Lagorinth/Labyrinth"
 import "github.com/golang/The-Lagorinth/Items"
 
 type Hero struct {
-	Base *NPC
-	ClassName string
-	BackGround string
-	SpellList []*Spell.Spell
-	Memory map[Point.Point]int
+	Base           *NPC
+	ClassName      string
+	BackGround     string
+	SpellList      []*Spell.Spell
+	Memory         map[Point.Point]int
 	MemoryDuration int
 }
 
@@ -44,7 +44,6 @@ func (hero *Hero) ApplyBackground(background *BackGround) {
 	hero.Base.DmgMultuplier += background.BonusDmgMultuplier
 }
 
-
 //UseInstantSpell handles the use of an instant spell
 func (hero *Hero) UseInstantSpell(spell *Spell.Spell) {
 	hero.Base.CurrentMana -= spell.ManaCost
@@ -73,9 +72,7 @@ func (hero *Hero) UseBuffSpell(spell *Spell.Spell) {
 	}
 }
 
-
-
-//UseProjectileSpell returns a projectile created from the Spell argument. 
+//UseProjectileSpell returns a projectile created from the Spell argument.
 func (hero *Hero) UseProjectileSpell(spell *Spell.Spell) *Spell.Projectile {
 	crit := hero.Base.CritChance + hero.Base.Weapon.BonusCritChance
 	hero.Base.CurrentMana -= spell.ManaCost
@@ -108,7 +105,7 @@ func (hero *Hero) MemorizeLabyrinth(labyrinth *Labyrinth.Labyrinth, center *Poin
 				hero.Memory[Point.Point{xAscend, y, nil}] = hero.MemoryDuration
 			} else {
 				hero.Memory[Point.Point{xAscend, y, nil}] = hero.MemoryDuration
-				break 
+				break
 			}
 		}
 		for xDescend := center.X; xDescend >= minX; xDescend-- {
@@ -117,7 +114,7 @@ func (hero *Hero) MemorizeLabyrinth(labyrinth *Labyrinth.Labyrinth, center *Poin
 				hero.Memory[Point.Point{xDescend, y, nil}] = hero.MemoryDuration
 			} else {
 				hero.Memory[Point.Point{xDescend, y, nil}] = hero.MemoryDuration
-				break 
+				break
 			}
 		}
 	}
@@ -129,7 +126,7 @@ func (hero *Hero) MemorizeLabyrinth(labyrinth *Labyrinth.Labyrinth, center *Poin
 				hero.Memory[Point.Point{x, yDescend, nil}] = hero.MemoryDuration
 			} else {
 				hero.Memory[Point.Point{x, yDescend, nil}] = hero.MemoryDuration
-				break 
+				break
 			}
 		}
 		for yAscend := center.Y; yAscend <= maxY; yAscend++ {
@@ -138,7 +135,7 @@ func (hero *Hero) MemorizeLabyrinth(labyrinth *Labyrinth.Labyrinth, center *Poin
 				hero.Memory[Point.Point{x, yAscend, nil}] = hero.MemoryDuration
 			} else {
 				hero.Memory[Point.Point{x, yAscend, nil}] = hero.MemoryDuration
-				break 
+				break
 			}
 		}
 	}

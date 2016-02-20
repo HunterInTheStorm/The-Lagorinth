@@ -6,14 +6,14 @@ import "github.com/golang/The-Lagorinth/Labyrinth"
 import "math/rand"
 
 type Projectile struct {
-	Symbol string
-	SpellName string
-	Location Point.Point
-	Vector Point.Point
+	Symbol                   string
+	SpellName                string
+	Location                 Point.Point
+	Vector                   Point.Point
 	WillStun, CanDestroyWall bool
-	CritChance int
-	Damage int
-	Buff *Buff
+	CritChance               int
+	Damage                   int
+	Buff                     *Buff
 }
 
 //DoDamage returns the damage that will be dealt to a character.

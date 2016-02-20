@@ -24,9 +24,9 @@ var chanceToBeTreasure int = 25
 var chanceToBeTrap int = 10
 var chanceToBeNpc int = 15
 
-type Labyrinth struct{
+type Labyrinth struct {
 	Width, Height int
-	Labyrinth [40][40]string
+	Labyrinth     [40][40]string
 }
 
 //CreateLabyrinth call Prim function which handles the creation pf the labyrinth.
@@ -43,21 +43,21 @@ func (lab *Labyrinth) CreateLabyrinth(seed int64) {
 //refer to package description for more details on Prim's algorithm.
 func (lab *Labyrinth) Prim() {
 	frontier := make([]Point.Point, 0, 40)
-	var start Point.Point = Point.Point{rand.Intn(lab.Width - 1) + 1, rand.Intn(lab.Width - 1) + 1, nil}
+	var start Point.Point = Point.Point{rand.Intn(lab.Width-1) + 1, rand.Intn(lab.Width-1) + 1, nil}
 	lab.Labyrinth[start.X][start.Y] = StartPosition
 	lab.neighbours(&start, &frontier)
 	for {
 		randomPoint := rand.Intn(len(frontier))
 		current := frontier[randomPoint]
-		frontier = append(frontier[:randomPoint], frontier[randomPoint +1:]...)
+		frontier = append(frontier[:randomPoint], frontier[randomPoint+1:]...)
 
 		opposite := current.Opposite()
 		last := opposite
-		
+
 		if lab.Labyrinth[opposite.X][opposite.Y] == Wall {
 			lab.Labyrinth[current.X][current.Y] = Pass
 
-			if opposite.X != 0 && opposite.X != lab.Width - 1 && opposite.Y != 0 && opposite.Y != lab.Height - 1 {
+			if opposite.X != 0 && opposite.X != lab.Width-1 && opposite.Y != 0 && opposite.Y != lab.Height-1 {
 				lab.Labyrinth[opposite.X][opposite.Y] = Pass
 			}
 
@@ -74,22 +74,21 @@ func (lab *Labyrinth) Prim() {
 //A slice which is passed on to addNeighbour.
 //And a point. Function determines all of the point's neighbours and passes their coordinates to addNeighbour.
 //Point is passed on to addNeighbour as well to be used as a parent point for its neighbours.
-func(lab *Labyrinth) neighbours(point *Point.Point, frontier *[]Point.Point) {
-	lab.addNeighbour(point.X + 1, point.Y  	 , point, frontier)
-	lab.addNeighbour(point.X - 1, point.Y 	 , point, frontier)
-	lab.addNeighbour(point.X    , point.Y + 1,point, frontier)
-	lab.addNeighbour(point.X    , point.Y - 1,point, frontier)
+func (lab *Labyrinth) neighbours(point *Point.Point, frontier *[]Point.Point) {
+	lab.addNeighbour(point.X+1, point.Y, point, frontier)
+	lab.addNeighbour(point.X-1, point.Y, point, frontier)
+	lab.addNeighbour(point.X, point.Y+1, point, frontier)
+	lab.addNeighbour(point.X, point.Y-1, point, frontier)
 }
-
 
 //addNeighbour add a point to frontier slice if the point is not has not been added already.
 //Function takes 4 arguments.
 //2 coordinates for the point to be added to frontier slice.
 //A parent point.
 //And the slice itself.
-func(lab *Labyrinth) addNeighbour(x int, y int, parent *Point.Point, frontier *[]Point.Point) {
+func (lab *Labyrinth) addNeighbour(x int, y int, parent *Point.Point, frontier *[]Point.Point) {
 	if !pointMap[Point.Point{x, y, parent}] {
-		if (x > 0 && x < lab.Width - 1) && (y > 0 && y < lab.Height - 1) {
+		if (x > 0 && x < lab.Width-1) && (y > 0 && y < lab.Height-1) {
 			pointToBeAdd := Point.Point{x, y, parent}
 			*frontier = append(*frontier, pointToBeAdd)
 			pointMap[pointToBeAdd] = true
@@ -99,18 +98,18 @@ func(lab *Labyrinth) addNeighbour(x int, y int, parent *Point.Point, frontier *[
 
 //countWalls counts how many of the neighbours of a point, in the labyrinth, are walls and returns that count.
 //Function takes 2 arguments, the coordinates of the point.
-func(lab *Labyrinth) countWalls(x int, y int) int {
+func (lab *Labyrinth) countWalls(x int, y int) int {
 	var wallCount int = 0
-	if lab.Labyrinth[x + 1][y] == Wall {
+	if lab.Labyrinth[x+1][y] == Wall {
 		wallCount++
 	}
-	if lab.Labyrinth[x - 1][y] == Wall {
+	if lab.Labyrinth[x-1][y] == Wall {
 		wallCount++
 	}
-	if lab.Labyrinth[x][y + 1] == Wall {
+	if lab.Labyrinth[x][y+1] == Wall {
 		wallCount++
 	}
-	if lab.Labyrinth[x][y - 1] == Wall {
+	if lab.Labyrinth[x][y-1] == Wall {
 		wallCount++
 	}
 	return wallCount
@@ -118,28 +117,28 @@ func(lab *Labyrinth) countWalls(x int, y int) int {
 
 //isDeadEnd returns true if a point in the labyrinth has 3 neighbours that are walls
 //Function takes 2 arguments, the coordinates of the point.
-func(lab *Labyrinth) isDeadEnd(x int, y int) bool {
+func (lab *Labyrinth) isDeadEnd(x int, y int) bool {
 	return lab.countWalls(x, y) == 3
 }
 
 //isTreasure return true if a random value is lower than chanceToBeTreasure global variable.
-//Function is used for the placement of treasures in the labyrinth. 
-func(lab *Labyrinth) isTreasure() bool {
-	return rand.Intn(100) < chanceToBeTreasure 
+//Function is used for the placement of treasures in the labyrinth.
+func (lab *Labyrinth) isTreasure() bool {
+	return rand.Intn(100) < chanceToBeTreasure
 }
 
 //placeNpc places a monster symbol in the labyrinth if a random value is lower than chanceToBeNpc global variable.
 //It takes 2 arguments, the coordinates of the point where the symbol will be places.
-func(lab *Labyrinth) placeNpc(x int, y int) {
+func (lab *Labyrinth) placeNpc(x int, y int) {
 	if rand.Intn(100) < chanceToBeNpc {
 		lab.Labyrinth[x][y] = Monster
 	}
 }
 
 //createTreasuresAndTraps handles the placement of treasures, traps and monsters in the labyrinth.
-func(lab *Labyrinth) createTreasuresAndTraps() {
-	for i := 1; i < lab.Width - 1; i++ {
-		for j := 1; j < lab.Height - 1; j++ {
+func (lab *Labyrinth) createTreasuresAndTraps() {
+	for i := 1; i < lab.Width-1; i++ {
+		for j := 1; j < lab.Height-1; j++ {
 			if lab.Labyrinth[i][j] == Pass {
 				if lab.isDeadEnd(i, j) {
 					if lab.isTreasure() {
@@ -167,11 +166,11 @@ func (lab *Labyrinth) IsInBondaries(x int, y int) bool {
 }
 
 //isCrossRoad returns true if 1 or less of the neighbours of point are walls.
-func(lab *Labyrinth) isCrossRoad(x int, y int) bool {
+func (lab *Labyrinth) isCrossRoad(x int, y int) bool {
 	return lab.countWalls(x, y) < 2
 }
 
 //isTrap returns true if a random value is lower than the chanceToBeTrap global variable.
-func(lab *Labyrinth) isTrap() bool {
+func (lab *Labyrinth) isTrap() bool {
 	return rand.Intn(100) < chanceToBeTrap
 }

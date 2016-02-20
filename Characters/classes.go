@@ -10,13 +10,13 @@ func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
 	//NPC
 	location := Point.Point{x, y, nil}
 	var dmgMultuplier float32 = 6.5
-	var defence int = 6 
+	var defence int = 6
 	var evasion int = 3
 	var critChance int = 15
 	var maxHealth float32 = 200.0
 	var healthRegen float32 = 3.6
 	var maxMana float32 = 75.0
-	var manaRegen float32= 1.9
+	var manaRegen float32 = 1.9
 	var visionRadious int = 4
 	var trapHandling int = 1
 
@@ -34,7 +34,7 @@ func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
 	base := NPC{&location, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
 		maxMana, manaRegen, visionRadious, false, make(map[int]*Spell.Buff), true, trapHandling}
-	
+
 	hero := Hero{&base, PaladinClassName, charBackGround, spellList, memory, memoryDuration}
 	return &hero
 }
@@ -43,8 +43,8 @@ func CreatePaladin(charName string, charBackGround string, x int, y int) *Hero {
 func CreateMage(charName string, charBackGround string, x int, y int) *Hero {
 	//NPC
 	location := Point.Point{x, y, nil}
-	var dmgMultuplier float32= 6.0
-	var defence int = 4 
+	var dmgMultuplier float32 = 6.0
+	var defence int = 4
 	var evasion int = 6
 	var critChance int = 20
 	var maxHealth float32 = 150.0
@@ -68,9 +68,9 @@ func CreateMage(charName string, charBackGround string, x int, y int) *Hero {
 	base := NPC{&location, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
 		maxMana, manaRegen, visionRadious, false, make(map[int]*Spell.Buff), true, trapHandling}
-	
+
 	hero := Hero{&base, MageClassName, charBackGround, spellList, memory, memoryDuration}
-	
+
 	return &hero
 }
 
@@ -80,7 +80,7 @@ func CreateRouge(charName string, charBackGround string, x int, y int) *Hero {
 	//NPC
 	location := Point.Point{x, y, nil}
 	var dmgMultuplier float32 = 7.5
-	var defence int = 5 
+	var defence int = 5
 	var evasion int = 10
 	var critChance int = 25
 	var maxHealth float32 = 175.0
@@ -101,11 +101,10 @@ func CreateRouge(charName string, charBackGround string, x int, y int) *Hero {
 	memory := make(map[Point.Point]int)
 	var memoryDuration int = 30
 
-
 	base := NPC{&location, Labyrinth.CharSymbol, charName, &Point.Point{1, 0, nil},
 		nil, nil, dmgMultuplier, defence, evasion, critChance, maxHealth, maxHealth, healthRegen, maxMana,
 		maxMana, manaRegen, visionRadious, false, make(map[int]*Spell.Buff), true, trapHandling}
-	
+
 	hero := Hero{&base, RougeClassName, charBackGround, spellList, memory, memoryDuration}
 
 	return &hero

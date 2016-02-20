@@ -27,7 +27,7 @@ func PaladinSpellHeal(point *Point.Point) *Spell {
 	var buffId int = id
 	var manaCostPerSecond float32 = 0.0
 	var bonusHealthRegen float32 = 0.0
-	var bonusDamageMultiplier float32 = 0.0 
+	var bonusDamageMultiplier float32 = 0.0
 	var duration int = 0
 	var bonusDamage int = 0
 	var bonusDefence int = 0
@@ -42,8 +42,8 @@ func PaladinSpellHeal(point *Point.Point) *Spell {
 	var canDestroyWall bool = false
 
 	spell := Spell{origin, symbol, spellName, isSelfTargeted, isProjectile, isAreaOfEffect,
-		isBuff, regainHealth, bonusHealthRegen, manaCost, manaCostPerSecond,bonusDamageMultiplier,
-		radius, duration, damage, bonusDamage, bonusDefence,bonusEvasion, bonusCritChance, willStun,
+		isBuff, regainHealth, bonusHealthRegen, manaCost, manaCostPerSecond, bonusDamageMultiplier,
+		radius, duration, damage, bonusDamage, bonusDefence, bonusEvasion, bonusCritChance, willStun,
 		canDestroyWall, willApplyToEnemies, cooldownTime, coolDownTimeLeft, isOnCoolDown, buffId}
 
 	id++
@@ -68,12 +68,12 @@ func PaladinSpellHolyArmor(point *Point.Point) *Spell {
 	var coolDownTimeLeft int = 0
 	//instant spell
 	var regainHealth float32 = 0.0
-	var manaCost float32 = 10.0 
+	var manaCost float32 = 10.0
 	//buff
 	var buffId int = id
-	var manaCostPerSecond float32= 3.0
+	var manaCostPerSecond float32 = 3.0
 	var bonusHealthRegen float32 = 1.0
-	var bonusDamageMultiplier float32= 0.0 
+	var bonusDamageMultiplier float32 = 0.0
 	var duration int = 15
 	var bonusDamage int = 0
 	var bonusDefence int = 4
@@ -82,14 +82,14 @@ func PaladinSpellHolyArmor(point *Point.Point) *Spell {
 	var willApplyToEnemies bool = false
 	//AoE has buff
 	var damage int = 0
-	var radius int = 0 
+	var radius int = 0
 	//Projectile has damage and buff
 	var willStun bool = false
 	var canDestroyWall bool = false
 
 	spell := Spell{origin, symbol, spellName, isSelfTargeted, isProjectile, isAreaOfEffect,
-		isBuff, regainHealth, bonusHealthRegen, manaCost, manaCostPerSecond,bonusDamageMultiplier,
-		radius, duration, damage, bonusDamage, bonusDefence,bonusEvasion, bonusCritChance, willStun,
+		isBuff, regainHealth, bonusHealthRegen, manaCost, manaCostPerSecond, bonusDamageMultiplier,
+		radius, duration, damage, bonusDamage, bonusDefence, bonusEvasion, bonusCritChance, willStun,
 		canDestroyWall, willApplyToEnemies, cooldownTime, coolDownTimeLeft, isOnCoolDown, buffId}
 
 	id++
@@ -114,12 +114,12 @@ func PaladinSpellHolyBolt(point *Point.Point) *Spell {
 	var coolDownTimeLeft int = 0
 	//instant spell
 	var regainHealth float32 = 0.0
-	var manaCost float32 = 25.0 
+	var manaCost float32 = 25.0
 	//buff
 	var buffID int = id
-	var manaCostPerSecond float32= 0.0
+	var manaCostPerSecond float32 = 0.0
 	var bonusHealthRegen float32 = 0.0
-	var bonusDamageMultiplier float32= 0.0
+	var bonusDamageMultiplier float32 = 0.0
 	var duration int = 0
 	var bonusDamage int = 0
 	var bonusDefence int = 0
@@ -127,18 +127,17 @@ func PaladinSpellHolyBolt(point *Point.Point) *Spell {
 	var bonusCritChance int = 0
 	var willApplyToEnemies bool = true
 	//AoE has buff
-	var damage int = 400	
-	var radius int = 0 
+	var damage int = 400
+	var radius int = 0
 	//Projectile has damage and buff
 	var willStun bool = false
 	var canDestroyWall bool = false
 
 	spell := Spell{origin, symbol, spellName, isSelfTargeted, isProjectile, isAreaOfEffect,
-		isBuff, regainHealth, bonusHealthRegen, manaCost, manaCostPerSecond,bonusDamageMultiplier,
-		radius, duration, damage, bonusDamage, bonusDefence,bonusEvasion, bonusCritChance, willStun,
+		isBuff, regainHealth, bonusHealthRegen, manaCost, manaCostPerSecond, bonusDamageMultiplier,
+		radius, duration, damage, bonusDamage, bonusDefence, bonusEvasion, bonusCritChance, willStun,
 		canDestroyWall, willApplyToEnemies, cooldownTime, coolDownTimeLeft, isOnCoolDown, buffID}
 
 	id++
 	return &spell
 }
-

@@ -9,24 +9,24 @@ import "github.com/golang/The-Lagorinth/Point"
 var id int = 0
 
 type Spell struct {
-	Origin *Point.Point
-	Symbol string
-	SpellName string
-	IsSelfTargeted, IsProjectile, IsAreaOfEffect, IsBuff bool
-	RegainHealth, BonusHealthRegen float32
-	ManaCost, ManaCostPerTurn float32
-	BonusDamageMultiplier float32
-	Radius, Duration int
-	Damage int
+	Origin                                                   *Point.Point
+	Symbol                                                   string
+	SpellName                                                string
+	IsSelfTargeted, IsProjectile, IsAreaOfEffect, IsBuff     bool
+	RegainHealth, BonusHealthRegen                           float32
+	ManaCost, ManaCostPerTurn                                float32
+	BonusDamageMultiplier                                    float32
+	Radius, Duration                                         int
+	Damage                                                   int
 	BonusDamage, BonusDefence, BonusEvasion, BonusCritChance int
-	WillStun, CanDestroyWall, WillApplyToEnemies bool
-	CoolDownTime int
-	CoolDownTimeLeft int
-	IsOnCoolDown bool
-	BuffId int
+	WillStun, CanDestroyWall, WillApplyToEnemies             bool
+	CoolDownTime                                             int
+	CoolDownTimeLeft                                         int
+	IsOnCoolDown                                             bool
+	BuffId                                                   int
 }
 
-//GoOnCoolDown sets a cool down for the used spell so that it cannot be used again until it reaches 0. 
+//GoOnCoolDown sets a cool down for the used spell so that it cannot be used again until it reaches 0.
 func (spell *Spell) GoOnCoolDown() {
 	spell.IsOnCoolDown = true
 	spell.CoolDownTimeLeft = spell.CoolDownTime
@@ -71,7 +71,7 @@ func (spell *Spell) CreateProjectile(vector *Point.Point, critical int) *Project
 	var spellName string = spell.SpellName
 	var location = Point.Point{spell.Origin.X, spell.Origin.Y, nil}
 	var newVector = Point.Point{vector.X, vector.Y, nil}
-	var willStun bool = spell.WillStun 
+	var willStun bool = spell.WillStun
 	var canDestroyWall bool = spell.CanDestroyWall
 	var critChance int = critical
 	var damage int = spell.Damage

@@ -2,21 +2,21 @@
 package Character
 
 type BackGround struct {
-	Name string
+	Name                string
 	BonusMemoryDuration int
-	BonusVisionRadius int
-	BonusMana float32
-	BonusManaRegen float32
-	BonusHealth float32
-	BonusHealthRegen float32
-	BonusArmor int
-	BonusEvasion int
-	BonusCritChance int
-	BonusDmgMultuplier float32
+	BonusVisionRadius   int
+	BonusMana           float32
+	BonusManaRegen      float32
+	BonusHealth         float32
+	BonusHealthRegen    float32
+	BonusArmor          int
+	BonusEvasion        int
+	BonusCritChance     int
+	BonusDmgMultuplier  float32
 }
 
 //CreateBgGiant returns a background structure.
-func CreateBgGiant() *BackGround{
+func CreateBgGiant() *BackGround {
 	var memoryDuration int = 0
 	var visionRadius int = 0
 	var mana float32 = 0.0
@@ -39,7 +39,7 @@ func CreateBgToreador() *BackGround {
 	var memoryDuration int = 0
 	var visionRadius int = 1
 	var mana float32 = 10.0
-	var manaRegen float32 = 0.3 
+	var manaRegen float32 = 0.3
 	var health float32 = 10.0
 	var healthRegen float32 = 0.3
 	var armor int = 0
