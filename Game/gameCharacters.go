@@ -15,16 +15,16 @@ func (game *Game) playerAction() {
 		key := game.detectKeyPress()
 		switch key {
 		case "w":
-			game.plyerActionEvent(game.player.Base.Location.X - 1, game.player.Base.Location.Y, game.player.Base)
+			game.plyerActionEvent(game.player.Base.Location.X-1, game.player.Base.Location.Y, game.player.Base)
 			game.cameraReset()
 		case "a":
-			game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y - 1, game.player.Base)
+			game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y-1, game.player.Base)
 			game.cameraReset()
 		case "s":
-			game.plyerActionEvent(game.player.Base.Location.X + 1, game.player.Base.Location.Y, game.player.Base)
+			game.plyerActionEvent(game.player.Base.Location.X+1, game.player.Base.Location.Y, game.player.Base)
 			game.cameraReset()
 		case "d":
-			game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y + 1, game.player.Base)
+			game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y+1, game.player.Base)
 			game.cameraReset()
 		case "exit":
 			game.playerDefeted = true
@@ -63,7 +63,7 @@ func (game *Game) playerAction() {
 
 //plyerActionEvent determines what event follows depending on the tile ahead.
 func (game *Game) plyerActionEvent(x int, y int, character *Character.NPC) {
-	if x >= 0 && y >=0 && x < 40 && y < 40 {
+	if x >= 0 && y >= 0 && x < 40 && y < 40 {
 		switch game.labyrinth.Labyrinth[x][y] {
 		case Labyrinth.Pass:
 			if character.IsHuman {
@@ -135,16 +135,16 @@ func (game *Game) defeat(character *Character.NPC, place int) {
 }
 
 //fight handles the event of 2 characters fighting.
-func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int, ) {
+func (game *Game) fight(character *Character.NPC, enemyX int, enemyY int) {
 	character.ChangeOrientation(enemyX, enemyY)
 	place, enemy := game.findEnemy(enemyX, enemyY)
 	damage := character.DoDamage()
 	if rand.Intn(100) < enemy.Evasion {
 		game.avoidAttackMessage(character.Name, enemy.Name)
 	} else {
-	enemy.TakeDamage(damage)
-	enemy.ChangeOrientation(character.Location.X, character.Location.Y)
-	game.takeDamageMessage(damage, character, enemy)
+		enemy.TakeDamage(damage)
+		enemy.ChangeOrientation(character.Location.X, character.Location.Y)
+		game.takeDamageMessage(damage, character, enemy)
 	}
 	game.defeat(enemy, place)
 }
@@ -159,7 +159,7 @@ func (game *Game) lootEnemy(character *Character.NPC) {
 	game.newWeaponFound(weapon)
 }
 
-//newArmorFound handles the event when a new armor has been found. 
+//newArmorFound handles the event when a new armor has been found.
 func (game *Game) newArmorFound(found *Items.Armor) {
 	game.clearScreen()
 	game.compareArmor(game.player.Base.Armor, found)
@@ -170,7 +170,7 @@ func (game *Game) newArmorFound(found *Items.Armor) {
 	}
 }
 
-//newWeaponFound handles the event when a new weapon has been found. 
+//newWeaponFound handles the event when a new weapon has been found.
 func (game *Game) newWeaponFound(found *Items.Weapon) {
 	game.clearScreen()
 	game.compareWeapon(game.player.Base.Weapon, found)
@@ -199,10 +199,10 @@ func (game *Game) exitFound() {
 }
 
 //detectKeyPress return a string of the information entered via the keyboard.
-func (game *Game) detectKeyPress() string{
+func (game *Game) detectKeyPress() string {
 	reader := bufio.NewReader(os.Stdin)
 	key, _ := reader.ReadString('\n')
-	return strings.Trim(key,"\r\n")
+	return strings.Trim(key, "\r\n")
 }
 
 //applyRegenToAll calls the Regen function on every character.
@@ -268,10 +268,10 @@ func (game *Game) findEnemy(requiredX int, requiredY int) (int, *Character.NPC) 
 			return place, monster
 		}
 	}
- 	return -2, &Character.NPC{}
+	return -2, &Character.NPC{}
 }
 
 //removeMonster removes a character from the character list.
 func (game *Game) removeMonster(place int) {
-	game.monsterList = append(game.monsterList[:place], game.monsterList[place +1:]...)
+	game.monsterList = append(game.monsterList[:place], game.monsterList[place+1:]...)
 }

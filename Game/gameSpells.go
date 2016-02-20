@@ -6,9 +6,8 @@ import "github.com/golang/The-Lagorinth/Spells"
 import "github.com/golang/The-Lagorinth/Characters"
 import "math/rand"
 
-
 //manageSpells handles lowering the cool down on spells and the duration of buffs.
-func (game *Game) manageSpells(){
+func (game *Game) manageSpells() {
 	game.lowerCoolDownOnSpells()
 	game.lowerCharacterBuffDuration(game.player.Base)
 	for _, monster := range game.monsterList {
@@ -20,7 +19,7 @@ func (game *Game) manageSpells(){
 func (game *Game) lowerCharacterBuffDuration(character *Character.NPC) {
 	for _, buff := range character.BuffList {
 		if buff.Duration > 0 {
-			buff.LowerDuration()	
+			buff.LowerDuration()
 		} else {
 			character.RemoveBuff(buff)
 			if character.IsHuman {
@@ -96,8 +95,8 @@ func (game *Game) projectileHitsCharacter(x int, y int, projectile *Spell.Projec
 	if rand.Intn(100) < enemy.Evasion {
 		game.avoidSpellMessage(enemy)
 	} else {
-	enemy.TakeDamage(damage)
-	game.takeSpellDamageMessage(damage, enemy)
+		enemy.TakeDamage(damage)
+		game.takeSpellDamageMessage(damage, enemy)
 	}
 	if game.isCharacterDefeted(enemy) {
 		game.CharacterDefeted(enemy, place)
@@ -106,7 +105,7 @@ func (game *Game) projectileHitsCharacter(x int, y int, projectile *Spell.Projec
 
 //removeProjectile removes a projectile from the list of projectiles.
 func (game *Game) removeProjectile(place int) {
-	game.projectileList = append(game.projectileList[:place], game.projectileList[place +1:]...)
+	game.projectileList = append(game.projectileList[:place], game.projectileList[place+1:]...)
 }
 
 //findProjectile find a projectile in the list given a set of coordinates.
@@ -119,7 +118,7 @@ func (game *Game) findProjectile(x int, y int) int {
 	return -1
 }
 
-//useSpell determines the type of the spell cast and call appropriate functions. 
+//useSpell determines the type of the spell cast and call appropriate functions.
 func (game *Game) useSpell(spell *Spell.Spell, hero *Character.Hero) {
 	if spell.ManaCost < hero.Base.CurrentMana {
 		if !spell.IsOnCoolDown {

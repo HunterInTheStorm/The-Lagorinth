@@ -7,6 +7,7 @@ import "github.com/golang/The-Lagorinth/Point"
 import "fmt"
 import "os"
 import "os/exec"
+import "runtime"
 
 //draw calls all function responsible for drawing objects in the game.
 func (game *Game) draw() {
@@ -93,9 +94,16 @@ func (game *Game) drawHero() {
 
 //clearScreen clears the screen.
 func (game *Game) clearScreen() {
-	c := exec.Command("cmd", "/c", "cls")
-	c.Stdout = os.Stdout
-	c.Run()
+	switch runtime.GOOS {
+	case "windows":
+		c := exec.Command("cmd", "/c", "cls")
+		c.Stdout = os.Stdout
+		c.Run()
+	case "linux":
+		cmd := exec.Command("clear") //Linux example, its tested
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	}
 }
 
 //restoreTile replaces the current symbol of a tile with a symbol for an empty tile.
@@ -111,7 +119,7 @@ func (game *Game) restoreTile(x int, y int) {
 }
 
 //replaceTile replaces a tile if it is not a wall with another symbol.
-func(game *Game) replaceTile(x int, y int, symbol string) {
+func (game *Game) replaceTile(x int, y int, symbol string) {
 	if game.labyrinth.Labyrinth[x][y] != Labyrinth.Wall {
 		game.labyrinth.Labyrinth[x][y] = symbol
 	}

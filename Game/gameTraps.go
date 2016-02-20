@@ -23,10 +23,10 @@ func (game *Game) triggerDamageTrap(trap *Character.Trap, character *Character.N
 }
 
 //findEmptyTile receives 2 coordinates and find the nearest empty tile next to them.
-func (game *Game) findEmptyTile(centerX int, centerY int) Point.Point{
+func (game *Game) findEmptyTile(centerX int, centerY int) Point.Point {
 	for e := 0; true; e++ {
-		for i := centerX - 1 - e; i <= centerX + 1 + e; i++ {
-			for j := centerY - 1 - e; j <= centerY + 1 + e; j++ {
+		for i := centerX - 1 - e; i <= centerX+1+e; i++ {
+			for j := centerY - 1 - e; j <= centerY+1+e; j++ {
 				if i > -1 && j > -1 && game.labyrinth.Labyrinth[i][j] == Labyrinth.Pass {
 					return Point.Point{i, j, nil}
 				}
@@ -74,7 +74,7 @@ func (game *Game) triggerSpawnTrap(trap *Character.Trap) {
 		newMonster := game.createMonster(location.X, location.Y)
 		game.monsterList = append(game.monsterList, &newMonster)
 	} else {
-		location = game.findEmptyTile(location.X, location.Y)			
+		location = game.findEmptyTile(location.X, location.Y)
 		newMonster := game.createMonster(location.X, location.Y)
 		game.monsterList = append(game.monsterList, &newMonster)
 	}
@@ -106,7 +106,7 @@ func (game *Game) triggerTrap(trap *Character.Trap, character *Character.Hero) {
 
 //checkTraps if a trap has been triggered,
 func (game *Game) checkTraps() {
-	if trap, ok := game.isTrapTriggered(game.player.Base) ; ok {
+	if trap, ok := game.isTrapTriggered(game.player.Base); ok {
 		game.triggerTrap(trap, game.player)
 	}
 }
@@ -114,7 +114,7 @@ func (game *Game) checkTraps() {
 //isTrapTriggered checks if a trap is triggered by the player.
 func (game *Game) isTrapTriggered(character *Character.NPC) (*Character.Trap, bool) {
 	if trap, ok := game.trapList[Point.Point{character.Location.X, character.Location.Y, nil}]; ok {
-    	return trap, true
+		return trap, true
 	}
 	return &Character.Trap{}, false
 }
@@ -127,7 +127,7 @@ func (game *Game) removeTrap(trap *Character.Trap) {
 
 //calculateOddsVsTraps calculates the odd of a character detecting and disarming traps.
 func (game *Game) calculateOddsVsTraps(difficulty int, trapHandlingSkill int) int {
-	return 100 - difficulty * 10 + trapHandlingSkill * 5
+	return 100 - difficulty*10 + trapHandlingSkill*5
 }
 
 //attempDisarmTrap determines if a trap is successfully disarmed by randomness.
@@ -138,7 +138,7 @@ func (game *Game) attempDisarmTrap(trap *Character.Trap, character *Character.NP
 		time.Sleep(2000 * time.Millisecond)
 		trap.IsDisarmed = true
 		trap.CanBeDisarmed = false
-		game.trapsDisarmed ++
+		game.trapsDisarmed++
 		game.removeTrap(trap)
 	} else {
 		fmt.Println("YOU ARE SUCH A DISAPPOINTMENT")
@@ -169,16 +169,16 @@ func (game *Game) encounterTrap(character *Character.NPC, x int, y int) {
 		game.attempDetectTrap(trap, character)
 		if !trap.IsDetected {
 			game.characterMoveTo(character, x, y)
-		} 
+		}
 	} else if trap.IsDetected && trap.CanBeDisarmed {
 		fmt.Println("Do you want to disarm the trap(y/n)")
 		answer := game.detectKeyPress()
-		if answer == "y"{
+		if answer == "y" {
 			game.attempDisarmTrap(trap, character)
 		} else if answer == "n" {
 			game.characterMoveTo(character, x, y)
 		}
-	} else if !trap.IsDetected || !trap.IsDisarmed{
+	} else if !trap.IsDetected || !trap.IsDisarmed {
 		game.characterMoveTo(character, x, y)
 	} else {
 		game.characterMoveTo(character, x, y)

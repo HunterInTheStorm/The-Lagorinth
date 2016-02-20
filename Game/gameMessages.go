@@ -21,21 +21,21 @@ func (game *Game) monsterDefetedMessage(name string, playerName string) {
 
 //avoidAttackMessage prints a message when a character avoids an attack.
 func (game *Game) avoidAttackMessage(attackerName string, defenderName string) {
-	fmt.Printf("%s dodges %s's attack",defenderName, attackerName)
+	fmt.Printf("%s dodges %s's attack", defenderName, attackerName)
 	time.Sleep(2000 * time.Millisecond)
 }
 
 //takeDamageFromTrapMessage prints a message when the player takes damage from a trap.
 func (game *Game) takeDamageFromTrapMessage(damage float32, attackerName string, defender *Character.NPC) {
 	fmt.Printf("%s strikes %s for %v points of damage.\n", attackerName, defender.Name,
-						 int(damage))
+		int(damage))
 	time.Sleep(2000 * time.Millisecond)
 }
 
 //takeDamageMessage prints a message when a character takes damage from another character.
 func (game *Game) takeDamageMessage(damage float32, attacker *Character.NPC, defender *Character.NPC) {
 	fmt.Printf("%s strikes %s for %v points of damage. %s has %v HP left\n", attacker.Name, defender.Name,
-						 int(damage),defender.Name, int(defender.CurrentHealth))
+		int(damage), defender.Name, int(defender.CurrentHealth))
 	time.Sleep(2000 * time.Millisecond)
 }
 
@@ -66,7 +66,7 @@ func (game *Game) useInstantSpellMessage(spell *Spell.Spell, hero *Character.Her
 	fmt.Printf("%s uses %s.", hero.Base.Name, spell.SpellName)
 	if spell.ManaCost > 0 {
 		fmt.Printf("%s restores %v HP for %v MP", hero.Base.Name, spell.RegainHealth, spell.ManaCost)
-	} else{
+	} else {
 		fmt.Printf("%s restores %v MP for %v HP", hero.Base.Name, spell.ManaCost, spell.RegainHealth)
 	}
 	time.Sleep(2000 * time.Millisecond)
@@ -123,18 +123,18 @@ func (game *Game) askClassNameMessage() {
 //compareArmor prints a message containing the information of newly found armor and the currently equipped one.
 func (game *Game) compareArmor(current *Items.Armor, found *Items.Armor) {
 	fmt.Println("Your Armor\t\t\tNew Armor")
-	fmt.Printf("+Health: %v\t\t\t+Health: %v\n",current.Health, found.Health)
-	fmt.Printf ("+HP Regen: %v\t\t\t+HP Regen: %v\n",current.HealthRegen, found.HealthRegen)
-	fmt.Printf("+Mana: %v\t\t\t+Mana: %v\n",current.Mana, found.Mana)
-	fmt.Printf ("+MP Regen: %v\t\t\t+MP Regen: %v\n",current.ManaRegen, found.ManaRegen)
-	fmt.Printf("+Defence: %v\t\t\t+Defence: %v\n",current.Defence, found.Defence)
-	fmt.Printf("+Evasion: %v\t\t\t+Evasion: %v\n",current.Evasion, found.Evasion)
+	fmt.Printf("+Health: %v\t\t\t+Health: %v\n", current.Health, found.Health)
+	fmt.Printf("+HP Regen: %v\t\t\t+HP Regen: %v\n", current.HealthRegen, found.HealthRegen)
+	fmt.Printf("+Mana: %v\t\t\t+Mana: %v\n", current.Mana, found.Mana)
+	fmt.Printf("+MP Regen: %v\t\t\t+MP Regen: %v\n", current.ManaRegen, found.ManaRegen)
+	fmt.Printf("+Defence: %v\t\t\t+Defence: %v\n", current.Defence, found.Defence)
+	fmt.Printf("+Evasion: %v\t\t\t+Evasion: %v\n", current.Evasion, found.Evasion)
 }
 
 //compareWeapon prints a message containing the information of newly found weapon and the currently equipped one.
 func (game *Game) compareWeapon(current *Items.Weapon, found *Items.Weapon) {
 	fmt.Println("Your Weapon\t\t\tNew Weapon")
 	fmt.Printf("Damage: %v-%v\t\t\tDamage: %v-%v\n", current.MinDmg, current.MaxDmg, found.MinDmg, found.MaxDmg)
-	fmt.Printf("+BonusDmg: %v\t\t\t+BonusDmg: %v\n",current.BonusDmg, found.BonusDmg)
-	fmt.Printf ("+CritChance: %v\t\t\t+CritChance: %v\n",current.BonusCritChance, found.BonusCritChance)
+	fmt.Printf("+BonusDmg: %v\t\t\t+BonusDmg: %v\n", current.BonusDmg, found.BonusDmg)
+	fmt.Printf("+CritChance: %v\t\t\t+CritChance: %v\n", current.BonusCritChance, found.BonusCritChance)
 }

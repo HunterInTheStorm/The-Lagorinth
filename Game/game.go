@@ -7,21 +7,21 @@ import "github.com/golang/The-Lagorinth/Characters"
 import "github.com/golang/The-Lagorinth/Point"
 
 type Game struct {
-	playerDefeted bool
-	gameCompleted bool
-	score int
-	turns int
-	monsterSlain int
-	chestsLooted int
-	trapsDisarmed int
-	start *Point.Point
-	end *Point.Point
-	monsterList []*Character.NPC
-	trapList map[Point.Point]*Character.Trap
-	labyrinth *Labyrinth.Labyrinth
-	player *Character.Hero
-	camera *Point.Point
-	cameraRadius int
+	playerDefeted  bool
+	gameCompleted  bool
+	score          int
+	turns          int
+	monsterSlain   int
+	chestsLooted   int
+	trapsDisarmed  int
+	start          *Point.Point
+	end            *Point.Point
+	monsterList    []*Character.NPC
+	trapList       map[Point.Point]*Character.Trap
+	labyrinth      *Labyrinth.Labyrinth
+	player         *Character.Hero
+	camera         *Point.Point
+	cameraRadius   int
 	projectileList []*Spell.Projectile
 }
 
@@ -40,12 +40,11 @@ type Game struct {
 // 	return true
 // }
 
-
 //Run is the game's main loop cycle
 func (game *Game) Run() {
 	game.initialize()
 
-	for  {
+	for {
 		game.manageSpells()
 		game.player.UpdateMemory()
 		game.draw()

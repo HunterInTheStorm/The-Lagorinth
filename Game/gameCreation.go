@@ -43,13 +43,13 @@ func (game *Game) createLabyrinth() {
 			maze[i][j] = Labyrinth.Wall
 		}
 	}
-	game.labyrinth = &Labyrinth.Labyrinth{40,40, maze}
+	game.labyrinth = &Labyrinth.Labyrinth{40, 40, maze}
 	game.labyrinth.CreateLabyrinth(seed)
 }
 
 //createMonsterAndTrapsLists creates monsters and traps and places them in a respective list.
 func (game *Game) createMonsterAndTrapsLists() {
-	game.monsterList = make([]*Character.NPC,0,4)
+	game.monsterList = make([]*Character.NPC, 0, 4)
 	game.trapList = make(map[Point.Point]*Character.Trap)
 	for i := 0; i < 40; i++ {
 		for j := 0; j < 40; j++ {
@@ -62,8 +62,8 @@ func (game *Game) createMonsterAndTrapsLists() {
 				case Labyrinth.ExitPosition:
 					game.end = &Point.Point{i, j, nil}
 				case Labyrinth.Trap:
-				 	newTrap := game.createTrap(i, j)
-				 	newTrap.IsDisarmed = true
+					newTrap := game.createTrap(i, j)
+					newTrap.IsDisarmed = true
 					game.trapList[*newTrap.Location] = &newTrap
 				case Labyrinth.Monster:
 					newMonster := game.createMonster(i, j)
@@ -75,33 +75,33 @@ func (game *Game) createMonsterAndTrapsLists() {
 }
 
 //createMonster handles the creation of a character.
-func (game *Game) createMonster(x int, y int) Character.NPC{
+func (game *Game) createMonster(x int, y int) Character.NPC {
 	weapon := game.createWeapon()
 	armor := game.createArmor()
 	//TRANSFER VALUES TO SEPARATE FILE
 	monster := Character.NPC{&Point.Point{x, y, nil}, Labyrinth.Monster, "Skeleton", &Point.Point{-1, 0, nil},
-	nil, nil, 2.5,  10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spell.Buff), false, 1}
+		nil, nil, 2.5, 10, 3, 5, 120.0, 120.0, 1.5, 30, 30, 0.2, 2, false, make(map[int]*Spell.Buff), false, 1}
 	monster.EquipArmor(armor)
 	monster.EquipWeapon(weapon)
 	return monster
 }
 
 //createTrap handles the creation of a trap.
-func (game *Game) createTrap(x int, y int) Character.Trap{
+func (game *Game) createTrap(x int, y int) Character.Trap {
 	trap := Character.Trap{}
 	trap.Randomize(&Point.Point{x, y, nil})
 	return trap
 }
 
 //createArmor handles the creation of an armor.
-func(game *Game) createArmor() *Items.Armor {
+func (game *Game) createArmor() *Items.Armor {
 	armor := Items.Armor{}
 	armor.RandomizeArmor()
 	return &armor
 }
 
-//createWeapon handles the creation of an weapon. 
-func(game *Game) createWeapon() *Items.Weapon {
+//createWeapon handles the creation of an weapon.
+func (game *Game) createWeapon() *Items.Weapon {
 	weapon := Items.Weapon{}
 	weapon.RandomizeWeapon()
 	return &weapon
@@ -125,11 +125,11 @@ func (game *Game) createHero() {
 }
 
 //chooseBackground returns the name of the background the player has chosen.
-func(game *Game) chooseBackground() string {
+func (game *Game) chooseBackground() string {
 	game.availableBackGroundsMessage()
 	reader := bufio.NewReader(os.Stdin)
 	backGround, _ := reader.ReadString('\n')
-	return strings.Trim(backGround,"\r\n")
+	return strings.Trim(backGround, "\r\n")
 }
 
 //createEquipment create weapon and armor for the player's character and equips them.
@@ -173,24 +173,24 @@ func (game *Game) addBackground(charBackGround string, hero *Character.Hero) {
 	case Character.BackGroundNameCartographer:
 		backGround := Character.CreateBgCartographer()
 		hero.ApplyBackground(backGround)
-	case Character.BackGroundNameLibrarian:	
+	case Character.BackGroundNameLibrarian:
 		backGround := Character.CreateBgLibrarian()
 		hero.ApplyBackground(backGround)
 	}
 }
 
 //chooseName return a string of the desired name for the player's character.
-func(game *Game) chooseName() string {
+func (game *Game) chooseName() string {
 	game.askNameMessage()
- 	reader := bufio.NewReader(os.Stdin)
+	reader := bufio.NewReader(os.Stdin)
 	name, _ := reader.ReadString('\n')
-	return strings.Trim(name,"\r\n")
+	return strings.Trim(name, "\r\n")
 }
 
 //chooseClass return a string of the desired class for the player's character.
-func(game *Game) chooseClass() string {
+func (game *Game) chooseClass() string {
 	game.askClassNameMessage()
 	reader := bufio.NewReader(os.Stdin)
 	class, _ := reader.ReadString('\n')
-	return strings.Trim(class,"\r\n")
+	return strings.Trim(class, "\r\n")
 }
