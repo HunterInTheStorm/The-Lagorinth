@@ -9,48 +9,64 @@ import "os"
 import "bufio"
 import "strings"
 
+var upMovement string = "w"
+var leftMovement string = "a"
+var downMovement string = "s"
+var rightMovement string = "d"
+var exitCommand string = "exit"
+var castSpellOne string = "1"
+var castSpellTwo string = "2"
+var castSpellThree string = "3"
+var cameraMovementUp string = "8"
+var cameraMovementDown string = "5"
+var cameraMovementLeft string = "4"
+var cameraMovementRight string = "6"
+var cameraCenter string = "home"
+var yes string = "y"
+var no string = "n"
+
 //playerAction determines what event follows depending on the key pressed.
 func (game *Game) playerAction() {
 	if !game.player.Base.IsStunned {
 		key := game.detectKeyPress()
 		switch key {
-		case "w":
+		case upMovement:
 			game.plyerActionEvent(game.player.Base.Location.X-1, game.player.Base.Location.Y, game.player.Base)
 			game.cameraReset()
-		case "a":
+		case leftMovement:
 			game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y-1, game.player.Base)
 			game.cameraReset()
-		case "s":
+		case downMovement:
 			game.plyerActionEvent(game.player.Base.Location.X+1, game.player.Base.Location.Y, game.player.Base)
 			game.cameraReset()
-		case "d":
+		case rightMovement:
 			game.plyerActionEvent(game.player.Base.Location.X, game.player.Base.Location.Y+1, game.player.Base)
 			game.cameraReset()
-		case "exit":
+		case exitCommand:
 			game.playerDefeted = true
-		case "1":
+		case castSpellOne:
 			game.useSpell(game.player.SpellList[0], game.player)
-		case "2":
+		case castSpellTwo:
 			game.useSpell(game.player.SpellList[1], game.player)
-		case "3":
+		case castSpellThree:
 			game.useSpell(game.player.SpellList[2], game.player)
-		case "4":
+		case cameraMovementLeft:
 			game.cameraMoveLeft()
 			game.draw()
 			game.playerAction()
-		case "5":
+		case cameraMovementDown:
 			game.cameraMoveDown()
 			game.draw()
 			game.playerAction()
-		case "6":
+		case cameraMovementRight:
 			game.cameraMoveRight()
 			game.draw()
 			game.playerAction()
-		case "8":
+		case cameraMovementUp:
 			game.cameraMoveUp()
 			game.draw()
 			game.playerAction()
-		case "home":
+		case cameraCenter:
 			game.cameraReset()
 			game.draw()
 			game.playerAction()
@@ -165,7 +181,7 @@ func (game *Game) newArmorFound(found *Items.Armor) {
 	game.compareArmor(game.player.Base.Armor, found)
 	game.newArmorFoundMessage()
 	key := game.detectKeyPress()
-	if key == "y" {
+	if key == yes {
 		game.player.SwapArmor(found)
 	}
 }
@@ -176,7 +192,7 @@ func (game *Game) newWeaponFound(found *Items.Weapon) {
 	game.compareWeapon(game.player.Base.Weapon, found)
 	game.newWeaponFoundMessage()
 	key := game.detectKeyPress()
-	if key == "y" {
+	if key == yes {
 		game.player.SwapWeapon(found)
 	}
 }

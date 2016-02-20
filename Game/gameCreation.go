@@ -11,6 +11,9 @@ import "os"
 import "bufio"
 import "strings"
 
+const dimensionX int = 40
+const dimensionY int = 40
+
 //initialize handles setting the game field values and creating the objects used in the game.
 //Call other functions.
 func (game *Game) initialize() {
@@ -37,13 +40,13 @@ func (game *Game) setGameFieldValues() {
 //createLabyrinth creates the labyrinth.
 func (game *Game) createLabyrinth() {
 	var seed int64 = time.Now().UTC().UnixNano()
-	var maze [40][40]string
-	for i := 0; i < 40; i++ {
-		for j := 0; j < 40; j++ {
+	var maze [dimensionX][dimensionY]string
+	for i := 0; i < dimensionX; i++ {
+		for j := 0; j < dimensionY; j++ {
 			maze[i][j] = Labyrinth.Wall
 		}
 	}
-	game.labyrinth = &Labyrinth.Labyrinth{40, 40, maze}
+	game.labyrinth = &Labyrinth.Labyrinth{dimensionX, dimensionY, maze}
 	game.labyrinth.CreateLabyrinth(seed)
 }
 
@@ -51,8 +54,8 @@ func (game *Game) createLabyrinth() {
 func (game *Game) createMonsterAndTrapsLists() {
 	game.monsterList = make([]*Character.NPC, 0, 4)
 	game.trapList = make(map[Point.Point]*Character.Trap)
-	for i := 0; i < 40; i++ {
-		for j := 0; j < 40; j++ {
+	for i := 0; i < dimensionX; i++ {
+		for j := 0; j < dimensionY; j++ {
 			tile := game.labyrinth.Labyrinth[i][j]
 			if tile != Labyrinth.Wall {
 				switch tile {
